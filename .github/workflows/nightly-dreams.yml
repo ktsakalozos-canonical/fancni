@@ -68,11 +68,9 @@ jobs:
 
           Your task:
           1. Analyze the project architecture and its recent development direction.
-          2. Suggest up to 10 concrete, ranked ideas for next steps or improvements.
-          3. Each idea should go on its own file in the misc/nightly-dreams directory, with a filename that is a single descriptive word summarizing the idea.
-          4. For each idea provide: a title, a 2-3 sentence description, and a feasibility note.
-          5. Rank all ideas by their potential impact and feasibility, and discard any that are not promising.
-          6. Rank by combined impact and feasibility; discard any beyond 10. Discard means you delete the file with the idea you want to discard.
+          2. Suggest up to 10 concret ideas for next steps or improvements. Each idea should go on its own file in the misc/nightly-dreams directory, with a filename that is a single descriptive word summarizing the idea.
+          4. For each idea provide: a title, a description, and a feasibility note.
+          5. If there are more than 11 files in the misc/nightly-dreams directory, that means there are already 10 ideas suggested. In that case review all ideas and select only the 10 that are more interesting and feasible. Discard the rest. Discard means you delete the file with the idea you want to discard.
 
           Format rules:
           - Start your entire response with exactly one line: FILENAME: <one-word> (a short, descriptive, lowercase word summarizing the theme of your suggestions, e.g. 'observability', 'security', 'testing').
