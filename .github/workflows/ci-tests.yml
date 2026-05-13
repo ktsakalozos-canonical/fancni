@@ -42,7 +42,7 @@ jobs:
           sudo lxd init --auto
           sudo lxd waitready
           sudo lxc network set lxdbr0 ipv6.address none
-          sudo systemctl restart lxd
+          sudo systemctl restart snap.lxd.daemon
           sudo lxd waitready
 
       - name: Add runner to lxd group
