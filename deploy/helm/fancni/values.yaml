@@ -1,0 +1,29 @@
+overlay:
+  network: "240.0.0.0/8"
+
+underlay:
+  prefix: 16
+
+images:
+  cni:
+    repository: fancni
+    tag: latest
+    pullPolicy: IfNotPresent
+  init:
+    repository: fancni-init
+    tag: latest
+    pullPolicy: IfNotPresent
+
+cni:
+  version: "1.0.0"
+  name: "fancni"
+  confFileName: "10-fancni.conf"
+
+ipam:
+  dataDir: "/var/lib/cni/fancni"
+
+tolerations:
+  - operator: Exists
+    effect: NoSchedule
+  - operator: Exists
+    effect: NoExecute

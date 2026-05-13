@@ -1,0 +1,43 @@
+# Two busybox pods for verifying fancni pod connectivity.
+# After applying, exec into one pod and ping the other's IP.
+#
+# Usage:
+#   kubectl apply -f deploy/test/connectivity-test.yaml
+#   kubectl get pods -o wide          # note the pod IPs
+#   kubectl exec fancni-test-1 -- ping -c3 <fancni-test-2-IP>
+#   kubectl exec fancni-test-2 -- ping -c3 <fancni-test-1-IP>
+#   kubectl exec fancni-test-1 -- ping -c3 8.8.8.8   # external connectivity
+
+# Pod 1
+apiVersion: v1
+kind: Pod
+metadata:
+  name: fancni-test-1
+  labels:
+    app: fancni-test
+spec:
+  nodeSelector:
+    kubernetes.io/hostname: node-1  # adjust or remove to suit your cluster
+  tolerations:
+    - operator: Exists
+  containers:
+    - name: test
+      image: busybox:1.36
+      command: ["sleep", "infinity"]
+---
+# Pod 2 – intentionally placed on a different node to exercise cross-node traffic
+apiVersion: v1
+kind: Pod
+metadata:
+  name: fancni-test-2
+  labels:
+    app: fancni-test
+spec:
+  nodeSelector:
+    kubernetes.io/hostname: node-2  # adjust or remove to suit your cluster
+  tolerations:
+    - operator: Exists
+  containers:
+    - name: test
+      image: busybox:1.36
+      command: ["sleep", "infinity"]

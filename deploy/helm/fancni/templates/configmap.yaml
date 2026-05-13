@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-cni-config
+  namespace: {{ .Release.Namespace }}
+data:
+  cni-conf: |
+    {
+      "cniVersion": "{{ .Values.cni.version }}",
+      "name": "{{ .Values.cni.name }}",
+      "type": "fancni",
+      "overlayNetwork": "{{ .Values.overlay.network }}",
+      "underlayPrefix": {{ .Values.underlay.prefix }}
+    }

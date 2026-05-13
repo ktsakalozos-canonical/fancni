@@ -1,0 +1,6 @@
+apiVersion: v2
+name: fancni
+description: Fan CNI - Kubernetes CNI plugin using Ubuntu Fan Networking
+type: application
+version: 0.1.0
+appVersion: "0.1.0"

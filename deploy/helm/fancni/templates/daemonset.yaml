@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: {{ .Release.Name }}-fancni
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: fancni
+    release: {{ .Release.Name }}
+spec:
+  selector:
+    matchLabels:
+      app: fancni
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: fancni
+        release: {{ .Release.Name }}
+    spec:
+      hostNetwork: true
+      hostPID: true
+      serviceAccountName: {{ .Release.Name }}-fancni
+      tolerations:
+        {{- toYaml .Values.tolerations | nindent 8 }}
+      initContainers:
+        - name: node-init
+          image: "{{ .Values.images.init.repository }}:{{ .Values.images.init.tag }}"
+          imagePullPolicy: {{ .Values.images.init.pullPolicy }}
+          securityContext:
+            privileged: true
+          env:
+            - name: OVERLAY_NETWORK
+              value: {{ .Values.overlay.network | quote }}
+            - name: UNDERLAY_PREFIX
+              value: {{ .Values.underlay.prefix | quote }}
+          volumeMounts:
+            - name: host-root
+              mountPath: /host
+      containers:
+        - name: install-cni
+          image: "{{ .Values.images.cni.repository }}:{{ .Values.images.cni.tag }}"
+          imagePullPolicy: {{ .Values.images.cni.pullPolicy }}
+          env:
+            - name: CNI_CONF
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Release.Name }}-cni-config
+                  key: cni-conf
+            - name: CNI_CONF_FILE
+              value: {{ .Values.cni.confFileName | quote }}
+          volumeMounts:
+            - name: cni-bin-dir
+              mountPath: /host/opt/cni/bin
+            - name: cni-net-dir
+              mountPath: /host/etc/cni/net.d
+      volumes:
+        - name: host-root
+          hostPath:
+            path: /
+        - name: cni-bin-dir
+          hostPath:
+            path: /opt/cni/bin
+        - name: cni-net-dir
+          hostPath:
+            path: /etc/cni/net.d
