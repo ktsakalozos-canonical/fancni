@@ -68,7 +68,7 @@ jobs:
 
           Your task:
           1. Analyze the project architecture and its recent development direction.
-          2. Suggest up to 10 concret ideas for next steps or improvements. Each idea MUST go in it own seperate file under the misc/nightly-dreams directory, with a filename that is a single descriptive word summarizing the idea. For example if you have two ideas, one on observability and a second on security you MUST create two files: misc/nightly-dreams/observability.md and misc/nightly-dreams/security.md. Do not create more than 10 files, if you have more than 10 ideas, select the 10 best ones. NEVER put two ideas in the same file.
+          2. Suggest one idea for next steps or improvements. Each idea MUST go in it own seperate file under the misc/nightly-dreams directory, with a filename that is a single descriptive word summarizing the idea. For example if you have an idea, on observability you MUST create one file: misc/nightly-dreams/observability.md. NEVER put two ideas in the same file.
           4. For each idea provide: a title, a description, and a feasibility note.
           5. If there are more than 11 files in the misc/nightly-dreams directory, that means there are already 10 ideas suggested. In that case, review all ideas and select only the 10 that are more interesting and feasible. Discard the rest by deleting the files with the ideas you want to discard.
 
