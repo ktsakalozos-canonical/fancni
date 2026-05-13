@@ -1,0 +1,50 @@
+name: PR Tests
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.24'
+
+      - name: Build
+        run: make build
+
+      - name: Unit tests
+        run: make test
+
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.24'
+
+      - name: Install LXD
+        run: |
+          sudo snap install lxd
+          sudo lxd init --auto
+          sudo lxd waitready
+
+      - name: Add runner to lxd group
+        run: sudo usermod -aG lxd "$USER"
+
+      - name: Install Helm
+        run: sudo snap install helm --classic
+
+      - name: Run e2e tests
+        run: sg lxd -c "make e2e"
