@@ -1,0 +1,67 @@
+name: ci-tests
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.24'
+
+      - name: Build
+        run: make build
+
+      - name: Unit tests
+        run: make test
+
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.24'
+
+      - name: Install LXD
+        run: |
+          sudo snap install lxd
+          sudo lxd init --auto
+          sudo lxd waitready
+          sudo lxc network set lxdbr0 ipv6.address none
+          sudo systemctl restart snap.lxd.daemon
+          sudo lxd waitready
+
+      - name: Fix Docker/LXD nftables conflict
+        run: |
+          # Docker's nftables FORWARD chain has policy DROP and no rules for LXD traffic.
+          # Add ACCEPT rules in DOCKER-USER (Docker's official extension point) and NAT masquerade.
+          LXD_BRIDGE="lxdbr0"
+          LXD_SUBNET=$(ip -4 addr show "$LXD_BRIDGE" | grep -oP 'inet \K[0-9./]+')
+          LXD_NETWORK=$(python3 -c "import ipaddress; print(ipaddress.ip_network('${LXD_SUBNET}', strict=False))")
+          DEFAULT_IF=$(ip route show default | awk '{print $5; exit}')
+          sudo iptables -I DOCKER-USER -i "$LXD_BRIDGE" -j ACCEPT
+          sudo iptables -I DOCKER-USER -o "$LXD_BRIDGE" -j ACCEPT
+          sudo iptables -t nat -A POSTROUTING -s "$LXD_NETWORK" -o "$DEFAULT_IF" -j MASQUERADE
+
+      - name: Add runner to lxd group
+        run: sudo usermod -aG lxd "$USER"
+
+      - name: Install Helm
+        run: sudo snap install helm --classic
+
+      - name: Run e2e tests
+        run: sg lxd -c "make e2e"

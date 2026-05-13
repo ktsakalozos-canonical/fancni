@@ -6,11 +6,11 @@ underlay:
 
 images:
   cni:
-    repository: fancni
+    repository: ghcr.io/ktsakalozos-canonical/fancni
     tag: latest
     pullPolicy: IfNotPresent
   init:
-    repository: fancni-init
+    repository: ghcr.io/ktsakalozos-canonical/fancni-init
     tag: latest
     pullPolicy: IfNotPresent
 

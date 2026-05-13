@@ -53,6 +53,25 @@ wait_for() {
   log "Ready: ${desc}"
 }
 
+# retry <max_attempts> <delay_seconds> <cmd…>
+retry() {
+  local max="$1"; shift
+  local delay="$1"; shift
+  local attempt=1
+  while true; do
+    if "$@"; then
+      return 0
+    fi
+    if (( attempt >= max )); then
+      log "Command failed after ${max} attempts: $*"
+      return 1
+    fi
+    log "  Attempt ${attempt}/${max} failed, retrying in ${delay}s..."
+    sleep "${delay}"
+    (( attempt++ ))
+  done
+}
+
 lxc_exec() {
   local vm="$1"; shift
   lxc exec "${vm}" -- "$@"
@@ -85,8 +104,8 @@ wait_for 300 "cloud-init ${NODE2}" \
 # Phase 3 – Install k8s snap
 # ---------------------------------------------------------------------------
 log "=== Phase 3: Installing k8s snap ==="
-lxc_exec "${NODE1}" snap install k8s --classic --channel=1.35-classic/stable
-lxc_exec "${NODE2}" snap install k8s --classic --channel=1.35-classic/stable
+retry 5 30 lxc_exec "${NODE1}" snap install k8s --classic --channel=1.35-classic/stable
+retry 5 30 lxc_exec "${NODE2}" snap install k8s --classic --channel=1.35-classic/stable
 
 # ---------------------------------------------------------------------------
 # Phase 4 – Bootstrap node-1 without CNI
@@ -137,6 +156,15 @@ for IMAGE in "fancni:latest" "fancni-init:latest" "nginx:latest" "cloudnativelab
         -n "${CTR_NS}" \
         images import -
   done
+done
+
+# Re-tag fancni images to match Helm chart references
+for VM in "${NODE1}" "${NODE2}"; do
+  log "  Re-tagging images in ${VM}..."
+  lxc exec "${VM}" -- "${CTR_BIN}" --address "${CTR_SOCK}" -n "${CTR_NS}" \
+    images tag "docker.io/library/fancni:latest" "ghcr.io/ktsakalozos-canonical/fancni:latest"
+  lxc exec "${VM}" -- "${CTR_BIN}" --address "${CTR_SOCK}" -n "${CTR_NS}" \
+    images tag "docker.io/library/fancni-init:latest" "ghcr.io/ktsakalozos-canonical/fancni-init:latest"
 done
 
 # ---------------------------------------------------------------------------
