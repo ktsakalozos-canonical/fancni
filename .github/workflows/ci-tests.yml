@@ -50,3 +50,6 @@ jobs:
 
       - name: Run e2e tests
         run: sg lxd -c "make e2e"
+
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
