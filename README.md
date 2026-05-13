@@ -8,52 +8,45 @@ A lightweight Kubernetes CNI plugin that implements Ubuntu Fan networking, enabl
 
 Ubuntu Fan networking maps a large overlay address space (default `240.0.0.0/8`) onto the existing underlay network. Each node receives a `/16` slice of the overlay derived deterministically from its underlay IP: for a node with underlay address `A.B.C.D`, pods are assigned addresses in `240.A.B.0/24` (with the exact range governed by the configured prefix length). The kernel's built-in Fan tunnel driver forwards packets between nodes by encapsulating them in UDP and routing them over the underlay, so pods on different nodes can communicate without any additional overlay daemons or encapsulation libraries.
 
+See [ARCHITECTURE.md](ARCHITECTURE.md) for a full description of the components and design rationale.
+
 ## Prerequisites
 
 - Ubuntu nodes (Fan networking relies on Ubuntu kernel support)
 - [Canonical Kubernetes](https://ubuntu.com/kubernetes) cluster (recommended)
 - Helm 3
-- Docker (for building images)
 
 ## Quick Start
 
-### 1. Build container images
+### 1. Deploy Canonical K8s without the network
 
 ```bash
-make docker-build        # builds fancni:latest and fancni-init:latest
+cat <<EOF > bootstrap-config.yaml
+cluster-config:
+  network:
+    enabled: false
+EOF
+sudo k8s bootstrap --file bootstrap-config.yaml
 ```
 
-### 2. Load images onto cluster nodes
-
-```bash
-docker save fancni:latest | sudo ctr -n k8s.io images import -
-docker save fancni-init:latest | sudo ctr -n k8s.io images import -
-```
-
-### 3. Install with Helm
+### 2. Install with Helm
 
 ```bash
 helm install fancni deploy/helm/fancni/
 ```
 
-### 4. Verify
+See [docs/configuration.md](docs/configuration.md) for all available Helm values and configuration options.
+
+
+### 3. Verify
+
+All pods should reach Running status within ~30s
 
 ```bash
 kubectl -n kube-system get pods -l app=fancni
-# All pods should reach Running status within ~30 s
 ```
 
-## Architecture
-
-See [ARCHITECTURE.md](ARCHITECTURE.md) for a full description of the components and design rationale.
-
-## Configuration
-
-See [docs/configuration.md](docs/configuration.md) for all available Helm values and configuration options.
-
-## Connectivity Test
-
-After installation, verify pod connectivity with the provided test manifests:
+### 4. Connectivity check
 
 ```bash
 # Edit deploy/test/connectivity-test.yaml to set nodeSelector values
@@ -66,6 +59,7 @@ kubectl exec fancni-test-1 -- ping -c3 <fancni-test-2-IP>
 kubectl exec fancni-test-2 -- ping -c3 <fancni-test-1-IP>
 kubectl exec fancni-test-1 -- ping -c3 8.8.8.8   # external connectivity
 ```
+
 
 ## Troubleshooting
 
