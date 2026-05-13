@@ -1,0 +1,155 @@
+name: Nightly Dreams
+
+on:
+  schedule:
+    - cron: '0 3 * * *'
+
+jobs:
+  morpheus:
+    runs-on: ubuntu-latest
+    # Only run on the default branch
+    if: github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+
+    permissions:
+      contents: write
+      models: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check for recent commits
+        id: check_commits
+        run: |
+          COUNT=$(git log --since='7 days ago' --oneline | wc -l)
+          echo "commit_count=$COUNT" >> "$GITHUB_OUTPUT"
+
+      - name: Skip if no recent commits
+        if: steps.check_commits.outputs.commit_count == '0'
+        run: |
+          echo "No commits in the last 7 days. Skipping Morpheus."
+          exit 0
+
+      - name: Gather context
+        if: steps.check_commits.outputs.commit_count != '0'
+        id: context
+        run: |
+          TREE=$(find . -not -path './.git/*' -not -path './_output/*' | head -200)
+          COMMITS=$(git log --since='7 days ago' --pretty=format:'%h %s' --stat | head -c 4000)
+          GOMOD=$(cat go.mod 2>/dev/null || echo "")
+          MAKEFILE=$(head -80 Makefile 2>/dev/null || echo "")
+
+          {
+            echo "PROJECT_CONTEXT<<ENDOFCONTEXT"
+            echo "=== Project Tree ==="
+            echo "$TREE"
+            echo ""
+            echo "=== Recent Commits (last 7 days) ==="
+            echo "$COMMITS"
+            echo ""
+            echo "=== go.mod ==="
+            echo "$GOMOD"
+            echo ""
+            echo "=== Makefile (first 80 lines) ==="
+            echo "$MAKEFILE"
+            echo "ENDOFCONTEXT"
+          } >> "$GITHUB_ENV"
+
+      - name: Call GitHub Models API (Morpheus)
+        if: steps.check_commits.outputs.commit_count != '0'
+        id: morpheus
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          SYSTEM_PROMPT="You are Morpheus, an AI agent that analyzes software projects and generates insightful ideas for their future development.
+
+          Your task:
+          1. Analyze the project architecture and its recent development direction.
+          2. Suggest up to 10 concrete, ranked ideas for next steps or improvements.
+          3. For each idea provide: a title, a 2-3 sentence description, and a feasibility note.
+          4. Rank by combined impact and feasibility; discard any beyond 10.
+
+          Format rules:
+          - Start your entire response with exactly one line: FILENAME: <one-word> (a short, descriptive, lowercase word summarizing the theme of your suggestions, e.g. 'observability', 'security', 'testing').
+          - After that line, write the ideas in Markdown."
+
+          USER_MESSAGE="$PROJECT_CONTEXT"
+
+          PAYLOAD=$(jq -n \
+            --arg system "$SYSTEM_PROMPT" \
+            --arg user "$USER_MESSAGE" \
+            '{
+              model: "openai/gpt-4.1",
+              messages: [
+                {role: "system", content: $system},
+                {role: "user", content: $user}
+              ],
+              max_tokens: 2048,
+              temperature: 0.7
+            }')
+
+          RESPONSE=$(curl -fsSL \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Content-Type: application/json" \
+            -d "$PAYLOAD" \
+            https://models.github.ai/inference/chat/completions)
+
+          if [ -z "$RESPONSE" ]; then
+            echo "::error::API response is empty"
+            exit 1
+          fi
+
+          CONTENT=$(echo "$RESPONSE" | jq -r '.choices[0].message.content')
+
+          if [ -z "$CONTENT" ] || [ "$CONTENT" = "null" ]; then
+            echo "::error::API response missing expected content at .choices[0].message.content"
+            exit 1
+          fi
+
+          # Extract the FILENAME word from the first line
+          FIRST_LINE=$(echo "$CONTENT" | head -1)
+          WORD=$(echo "$FIRST_LINE" | grep -oP '(?<=FILENAME:\s)\S+' | tr -cd '[:alnum:]_-' | tr '[:upper:]' '[:lower:]')
+
+          # Fallback to date if parsing fails or word is empty
+          if [ -z "$WORD" ]; then
+            WORD=$(date +%Y%m%d)
+          fi
+
+          # Strip the FILENAME line from the content body
+          BODY=$(echo "$CONTENT" | tail -n +2 | sed '/^[[:space:]]*$/{ 1d }')
+
+          echo "DREAM_WORD=$WORD" >> "$GITHUB_ENV"
+          {
+            echo "DREAM_BODY<<ENDDREAM"
+            echo "$BODY"
+            echo "ENDDREAM"
+          } >> "$GITHUB_ENV"
+
+      - name: Write dream file
+        if: steps.check_commits.outputs.commit_count != '0'
+        run: |
+          OUTPUT_FILE="misc/nightly-dreams/${DREAM_WORD}.md"
+          if [ -f "$OUTPUT_FILE" ]; then
+            DREAM_WORD="${DREAM_WORD}-$(date +%H%M%S)"
+            echo "DREAM_WORD=$DREAM_WORD" >> "$GITHUB_ENV"
+            OUTPUT_FILE="misc/nightly-dreams/${DREAM_WORD}.md"
+          fi
+          {
+            echo "# Morpheus — ${DREAM_WORD}"
+            echo ""
+            echo "_Generated: $(date -u +%Y-%m-%dT%H:%M:%SZ)_"
+            echo ""
+            echo "$DREAM_BODY"
+          } > "$OUTPUT_FILE"
+          echo "Wrote dream to $OUTPUT_FILE"
+
+      - name: Commit and push
+        if: steps.check_commits.outputs.commit_count != '0'
+        run: |
+          git config user.name "Morpheus"
+          git config user.email "morpheus@users.noreply.github.com"
+          git add "misc/nightly-dreams/${DREAM_WORD}.md"
+          git commit -m "morpheus: nightly dreams — ${DREAM_WORD} [skip ci]"
+          git push
