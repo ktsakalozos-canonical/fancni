@@ -63,8 +63,5 @@ jobs:
       - name: Install Helm
         run: sudo snap install helm --classic
 
-      - name: Setup upterm session
-        uses: owenthereal/action-upterm@v1
-
       - name: Run e2e tests
         run: sg lxd -c "make e2e"

@@ -158,6 +158,15 @@ for IMAGE in "fancni:latest" "fancni-init:latest" "nginx:latest" "cloudnativelab
   done
 done
 
+# Re-tag fancni images to match Helm chart references
+for VM in "${NODE1}" "${NODE2}"; do
+  log "  Re-tagging images in ${VM}..."
+  lxc exec "${VM}" -- "${CTR_BIN}" --address "${CTR_SOCK}" -n "${CTR_NS}" \
+    images tag "docker.io/library/fancni:latest" "ghcr.io/ktsakalozos-canonical/fancni:latest"
+  lxc exec "${VM}" -- "${CTR_BIN}" --address "${CTR_SOCK}" -n "${CTR_NS}" \
+    images tag "docker.io/library/fancni-init:latest" "ghcr.io/ktsakalozos-canonical/fancni-init:latest"
+done
+
 # ---------------------------------------------------------------------------
 # Phase 8 – Install fancni via Helm
 # ---------------------------------------------------------------------------
