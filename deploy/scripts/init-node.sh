@@ -33,20 +33,30 @@ if ! nsenter --target 1 --net -- ip link show "$BRIDGE_NAME" >/dev/null 2>&1; th
     nsenter --target 1 --net -- chroot /host fanctl up -o "$OVERLAY_NETWORK" -u "${HOST_IP}/${UNDERLAY_PREFIX}"
 fi
 
+# Disable ICMP redirects on fan bridge (packets legitimately arrive and leave on same interface)
+nsenter --target 1 --net -- sysctl -w "net.ipv4.conf.${BRIDGE_NAME}.send_redirects=0"
+# Disable reverse path filtering on fan bridge.
+# NOTE: all.rp_filter must also be 0 because Linux uses max(all, per-iface) as effective value.
+nsenter --target 1 --net -- sysctl -w "net.ipv4.conf.${BRIDGE_NAME}.rp_filter=0"
+nsenter --target 1 --net -- sysctl -w "net.ipv4.conf.all.rp_filter=0"
+# Ensure IP forwarding is enabled
+nsenter --target 1 --net -- sysctl -w "net.ipv4.ip_forward=1"
+
 # 6. Compute pod subnet for iptables
 IFS='.' read -r a b c d <<< "$HOST_IP"
 POD_SUBNET="${OVERLAY_FIRST}.${c}.${d}.0/24"
 
 # 7. Set iptables rules (idempotent via -C check)
+# Use iptables-legacy to match kube-proxy which also uses iptables-legacy on this platform.
 for RULE in "-s $POD_SUBNET -j ACCEPT" "-d $POD_SUBNET -j ACCEPT"; do
-    if ! nsenter --target 1 --net -- iptables -C FORWARD $RULE 2>/dev/null; then
-        nsenter --target 1 --net -- iptables -A FORWARD $RULE
+    if ! nsenter --target 1 --net -- iptables-legacy -C FORWARD $RULE 2>/dev/null; then
+        nsenter --target 1 --net -- iptables-legacy -I FORWARD 1 $RULE
     fi
 done
 
 MASQ_RULE="-s $POD_SUBNET ! -o $BRIDGE_NAME -j MASQUERADE"
-if ! nsenter --target 1 --net -- iptables -t nat -C POSTROUTING $MASQ_RULE 2>/dev/null; then
-    nsenter --target 1 --net -- iptables -t nat -A POSTROUTING $MASQ_RULE
+if ! nsenter --target 1 --net -- iptables-legacy -t nat -C POSTROUTING $MASQ_RULE 2>/dev/null; then
+    nsenter --target 1 --net -- iptables-legacy -t nat -A POSTROUTING $MASQ_RULE
 fi
 
 echo "Node initialization complete."

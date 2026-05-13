@@ -1,4 +1,4 @@
-.PHONY: build test clean docker-build docker-build-cni docker-build-init helm-template helm-lint
+.PHONY: build test clean docker-build docker-build-cni docker-build-init helm-template helm-lint e2e
 
 build:
 	go build -o _output/bin/fancni ./cmd/fancni/
@@ -22,3 +22,6 @@ helm-template:
 
 helm-lint:
 	helm lint deploy/helm/fancni/
+
+e2e:
+	bash tests/e2e/test-e2e.sh
