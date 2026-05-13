@@ -20,13 +20,18 @@ See [ARCHITECTURE.md](ARCHITECTURE.md) for a full description of the components 
 
 ### 1. Deploy Canonical K8s without the network
 
+
 ```bash
 cat <<EOF > bootstrap-config.yaml
 cluster-config:
   network:
     enabled: false
+  dns:
+    enabled: true
 EOF
+sudo snap install k8s --classic --channel=1.35-classic/stable
 sudo k8s bootstrap --file bootstrap-config.yaml
+sudo k8s kubectl config view --raw > ~/.kube/config
 ```
 
 ### 2. Install with Helm
@@ -43,28 +48,14 @@ See [docs/configuration.md](docs/configuration.md) for all available Helm values
 All pods should reach Running status within ~30s
 
 ```bash
-kubectl -n kube-system get pods -l app=fancni
-```
-
-### 4. Connectivity check
-
-```bash
-# Edit deploy/test/connectivity-test.yaml to set nodeSelector values
-# that match two nodes in your cluster, then apply:
-kubectl apply -f deploy/test/connectivity-test.yaml
-
-kubectl get pods -o wide          # note the IPs assigned to each pod
-
-kubectl exec fancni-test-1 -- ping -c3 <fancni-test-2-IP>
-kubectl exec fancni-test-2 -- ping -c3 <fancni-test-1-IP>
-kubectl exec fancni-test-1 -- ping -c3 8.8.8.8   # external connectivity
+sudo k8s kubectl get pods -l app=fancni
 ```
 
 
 ## Troubleshooting
 
 **`fanctl: command not found`**  
-The `fanctl` tool is not installed on the node. Ensure the `fancni-init` DaemonSet pod completed successfully on that node (`kubectl -n kube-system logs <fancni-init-pod>`).
+The `fanctl` tool is not installed on the node. Ensure the `fancni-init` DaemonSet pod completed successfully on that node (`kubectl logs <fancni-init-pod>`).
 
 **Bridge not created / fan device missing**  
 Verify the node is running Ubuntu with a kernel that includes Fan support (`uname -r`; typically 4.4+). Check dmesg for fan-related errors.
