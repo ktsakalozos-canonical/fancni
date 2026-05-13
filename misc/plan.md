@@ -301,20 +301,41 @@ cniConfig:
 
 ---
 
+## Network Policy Support
+
+Network policies are enforced via [kube-router](https://github.com/cloudnativelabs/kube-router) running in firewall-only mode (`--run-firewall=true`). kube-router is deployed as a second DaemonSet within the same Helm chart.
+
+- **Enabled by default** (`networkPolicy.enabled: true` in values.yaml)
+- Watches `NetworkPolicy` resources via the Kubernetes API
+- Enforces ingress/egress rules using iptables + ipsets on each node
+- When enabled, fancni's init script skips blanket FORWARD ACCEPT rules (kube-router manages the FORWARD chain)
+- The MASQUERADE rule for pod egress remains active regardless
+
+Configuration in `values.yaml`:
+```yaml
+networkPolicy:
+  enabled: true
+  image:
+    repository: cloudnativelabs/kube-router
+    tag: v2.9.0
+    pullPolicy: IfNotPresent
+  iptablesSyncPeriod: "5m"
+```
+
+---
+
 ## Constraints & Assumptions
 
 - **Ubuntu nodes only**: `ubuntu-fan` package is Ubuntu-specific
 - **IPv4 only**: Fan networking is IPv4 only
 - **Overlay `/8`, underlay `/16`**: Current `fanctl` limitation (per manpage: "Currently Fan can only apply overlay addresses with a /8 network mask, and underlay addresses with a /16 network mask")
 - **Privileged init container**: Required for host package installation, kernel module loading, and iptables modification
-- **No network policies**: Out of scope
 - **No dual-stack**: Out of scope
 - **`fanctl` is the only exec call**: All other operations use Go libraries (netlink, go-iptables)
 
 ## Out of Scope
 
 - IPv6 / dual-stack support
-- Network policy enforcement
 - Non-Ubuntu distro support
 - Reimplementing fanctl / VXLAN logic
 - Dynamic node watcher (fan VXLAN handles cross-node routing mathematically)

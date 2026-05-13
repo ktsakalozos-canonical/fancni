@@ -33,6 +33,8 @@ spec:
               value: {{ .Values.overlay.network | quote }}
             - name: UNDERLAY_PREFIX
               value: {{ .Values.underlay.prefix | quote }}
+            - name: NETWORK_POLICY_ENABLED
+              value: {{ .Values.networkPolicy.enabled | quote }}
           volumeMounts:
             - name: host-root
               mountPath: /host

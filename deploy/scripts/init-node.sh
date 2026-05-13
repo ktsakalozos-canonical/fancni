@@ -48,11 +48,13 @@ POD_SUBNET="${OVERLAY_FIRST}.${c}.${d}.0/24"
 
 # 7. Set iptables rules (idempotent via -C check)
 # Use iptables-legacy to match kube-proxy which also uses iptables-legacy on this platform.
-for RULE in "-s $POD_SUBNET -j ACCEPT" "-d $POD_SUBNET -j ACCEPT"; do
-    if ! nsenter --target 1 --net -- iptables-legacy -C FORWARD $RULE 2>/dev/null; then
-        nsenter --target 1 --net -- iptables-legacy -I FORWARD 1 $RULE
-    fi
-done
+if [ "${NETWORK_POLICY_ENABLED}" != "true" ]; then
+    for RULE in "-s $POD_SUBNET -j ACCEPT" "-d $POD_SUBNET -j ACCEPT"; do
+        if ! nsenter --target 1 --net -- iptables-legacy -C FORWARD $RULE 2>/dev/null; then
+            nsenter --target 1 --net -- iptables-legacy -I FORWARD 1 $RULE
+        fi
+    done
+fi
 
 MASQ_RULE="-s $POD_SUBNET ! -o $BRIDGE_NAME -j MASQUERADE"
 if ! nsenter --target 1 --net -- iptables-legacy -t nat -C POSTROUTING $MASQ_RULE 2>/dev/null; then

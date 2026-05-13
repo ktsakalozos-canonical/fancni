@@ -127,7 +127,8 @@ make -C "${REPO_ROOT}" docker-build
 # ---------------------------------------------------------------------------
 log "=== Phase 7: Transferring images into VMs ==="
 docker pull nginx:latest
-for IMAGE in "fancni:latest" "fancni-init:latest" "nginx:latest"; do
+docker pull cloudnativelabs/kube-router:v2.9.0
+for IMAGE in "fancni:latest" "fancni-init:latest" "nginx:latest" "cloudnativelabs/kube-router:v2.9.0"; do
   for VM in "${NODE1}" "${NODE2}"; do
     log "  Importing ${IMAGE} into ${VM}..."
     docker save "${IMAGE}" | lxc exec "${VM}" -- \
@@ -214,11 +215,152 @@ for IP in ${POD_IPS}; do
 done
 
 # ---------------------------------------------------------------------------
-# Phase 12 – Summary
+# Phase 12 – Verify kube-router pods running
 # ---------------------------------------------------------------------------
-log "=== Phase 12: Summary ==="
-log "IP assertion:   PASS=${PASS_COUNT}  FAIL=${FAIL_COUNT}"
-log "HTTP assertion: PASS=${HTTP_PASS}   FAIL=${HTTP_FAIL}"
+log "=== Phase 12: Verifying kube-router pods are Running ==="
+wait_for 300 "kube-router pods Running on both nodes" bash -c \
+  "lxc exec ${NODE1} -- sudo k8s kubectl -n kube-system get pods -l app=kube-router 2>/dev/null \
+   | awk 'NR>1{print \$3}' | grep -v Running | wc -l | grep -q '^0$'"
+
+# ---------------------------------------------------------------------------
+# Phase 13 – Test deny-all NetworkPolicy blocks traffic
+# ---------------------------------------------------------------------------
+log "=== Phase 13: Testing deny-all NetworkPolicy blocks traffic ==="
+
+# Create namespace and workloads
+lxc_exec "${NODE1}" sudo k8s kubectl create namespace netpol-test || true
+
+lxc_exec "${NODE1}" sudo k8s kubectl -n netpol-test run web \
+  --image=nginx:latest --labels="app=web" --restart=Never
+
+lxc_exec "${NODE1}" sudo k8s kubectl -n netpol-test run client \
+  --image=nginx:latest --labels="app=client" --restart=Never
+
+wait_for 120 "web pod Running in netpol-test" bash -c \
+  "lxc exec ${NODE1} -- sudo k8s kubectl -n netpol-test get pod web 2>/dev/null \
+   | awk 'NR>1{print \$3}' | grep -q Running"
+
+wait_for 120 "client pod Running in netpol-test" bash -c \
+  "lxc exec ${NODE1} -- sudo k8s kubectl -n netpol-test get pod client 2>/dev/null \
+   | awk 'NR>1{print \$3}' | grep -q Running"
+
+WEB_POD_IP=$(lxc_exec "${NODE1}" sudo k8s kubectl -n netpol-test get pod web \
+  -o jsonpath='{.status.podIP}')
+log "web pod IP: ${WEB_POD_IP}"
+
+# Verify connectivity before policy
+NETPOL_PASS=1
+PRE_CODE="000"
+for attempt in $(seq 1 5); do
+  PRE_CODE=$(lxc_exec "${NODE1}" \
+    sudo k8s kubectl -n netpol-test exec client -- \
+    curl -s -o /dev/null -w '%{http_code}' --max-time 5 "http://${WEB_POD_IP}" 2>/dev/null) || true
+  if [[ "${PRE_CODE}" == "200" ]]; then
+    break
+  fi
+  log "  Pre-policy attempt ${attempt}/5 returned ${PRE_CODE}, retrying in 5s..."
+  sleep 5
+done
+
+if [[ "${PRE_CODE}" == "200" ]]; then
+  log "  PASS: pre-policy curl returned 200"
+else
+  log "  FAIL: pre-policy curl returned ${PRE_CODE} (expected 200)"
+  NETPOL_PASS=0
+fi
+
+# Apply deny-all ingress policy
+lxc_exec "${NODE1}" sudo k8s kubectl apply -f - <<'EOF'
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: deny-all-ingress
+  namespace: netpol-test
+spec:
+  podSelector:
+    matchLabels:
+      app: web
+  policyTypes:
+  - Ingress
+EOF
+
+log "Waiting 15s for kube-router to sync deny-all rules..."
+sleep 15
+
+# Verify connectivity is now blocked (retry a few times to confirm it stays blocked)
+DENY_CODE="200"
+for attempt in $(seq 1 5); do
+  DENY_CODE=$(lxc_exec "${NODE1}" \
+    sudo k8s kubectl -n netpol-test exec client -- \
+    curl -s -o /dev/null -w '%{http_code}' --max-time 5 "http://${WEB_POD_IP}" 2>/dev/null) || true
+  if [[ "${DENY_CODE}" != "200" ]]; then
+    break
+  fi
+  log "  Deny attempt ${attempt}/5 still got ${DENY_CODE}, waiting 10s..."
+  sleep 10
+done
+
+if [[ "${DENY_CODE}" != "200" ]]; then
+  log "  PASS: deny-all policy blocked traffic (got ${DENY_CODE})"
+else
+  log "  FAIL: deny-all policy did NOT block traffic (still got 200)"
+  NETPOL_PASS=0
+fi
+
+# ---------------------------------------------------------------------------
+# Phase 14 – Test allow NetworkPolicy restores traffic
+# ---------------------------------------------------------------------------
+log "=== Phase 14: Testing allow NetworkPolicy restores traffic ==="
+
+lxc_exec "${NODE1}" sudo k8s kubectl apply -f - <<'EOF'
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-client
+  namespace: netpol-test
+spec:
+  podSelector:
+    matchLabels:
+      app: web
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app: client
+EOF
+
+log "Waiting 15s for kube-router to sync allow rules..."
+sleep 15
+
+# Verify connectivity is restored
+ALLOW_CODE="000"
+for attempt in $(seq 1 5); do
+  ALLOW_CODE=$(lxc_exec "${NODE1}" \
+    sudo k8s kubectl -n netpol-test exec client -- \
+    curl -s -o /dev/null -w '%{http_code}' --max-time 5 "http://${WEB_POD_IP}" 2>/dev/null) || true
+  if [[ "${ALLOW_CODE}" == "200" ]]; then
+    break
+  fi
+  log "  Allow attempt ${attempt}/5 returned ${ALLOW_CODE}, retrying in 10s..."
+  sleep 10
+done
+
+if [[ "${ALLOW_CODE}" == "200" ]]; then
+  log "  PASS: allow policy restored traffic (got 200)"
+else
+  log "  FAIL: allow policy did NOT restore traffic (got ${ALLOW_CODE})"
+  NETPOL_PASS=0
+fi
+
+# ---------------------------------------------------------------------------
+# Phase 15 – Summary (renumbered from 12)
+# ---------------------------------------------------------------------------
+log "=== Phase 15: Summary ==="
+log "IP assertion:          PASS=${PASS_COUNT}     FAIL=${FAIL_COUNT}"
+log "HTTP assertion:        PASS=${HTTP_PASS}      FAIL=${HTTP_FAIL}"
+log "NetworkPolicy assert:  PASS=$(( NETPOL_PASS == 1 ? 1 : 0 ))  FAIL=$(( NETPOL_PASS == 0 ? 1 : 0 ))"
 
 OVERALL_PASS=1
 if (( FAIL_COUNT > 0 )); then
@@ -227,6 +369,10 @@ if (( FAIL_COUNT > 0 )); then
 fi
 if (( HTTP_FAIL > 0 )); then
   log "FAILED HTTP IPs: ${FAILED_HTTP_IPS[*]}"
+  OVERALL_PASS=0
+fi
+if (( NETPOL_PASS == 0 )); then
+  log "FAILED: NetworkPolicy enforcement check(s) failed"
   OVERALL_PASS=0
 fi
 

@@ -27,3 +27,11 @@ tolerations:
     effect: NoSchedule
   - operator: Exists
     effect: NoExecute
+
+networkPolicy:
+  enabled: true
+  image:
+    repository: cloudnativelabs/kube-router
+    tag: v2.9.0
+    pullPolicy: IfNotPresent
+  iptablesSyncPeriod: "5m"

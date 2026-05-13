@@ -1,0 +1,61 @@
+{{- if .Values.networkPolicy.enabled }}
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: {{ .Release.Name }}-kube-router
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: kube-router
+    release: {{ .Release.Name }}
+spec:
+  selector:
+    matchLabels:
+      app: kube-router
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: kube-router
+        release: {{ .Release.Name }}
+    spec:
+      hostNetwork: true
+      serviceAccountName: {{ .Release.Name }}-fancni
+      tolerations:
+        {{- toYaml .Values.tolerations | nindent 8 }}
+      containers:
+        - name: kube-router
+          image: "{{ .Values.networkPolicy.image.repository }}:{{ .Values.networkPolicy.image.tag }}"
+          imagePullPolicy: {{ .Values.networkPolicy.image.pullPolicy }}
+          args:
+            - --run-firewall=true
+            - --run-router=false
+            - --run-service-proxy=false
+            - --run-loadbalancer=false
+            - --iptables-sync-period={{ .Values.networkPolicy.iptablesSyncPeriod }}
+          securityContext:
+            privileged: true
+          resources:
+            requests:
+              cpu: 100m
+              memory: 64Mi
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 20244
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          volumeMounts:
+            - name: lib-modules
+              mountPath: /lib/modules
+              readOnly: true
+            - name: xtables-lock
+              mountPath: /run/xtables.lock
+      volumes:
+        - name: lib-modules
+          hostPath:
+            path: /lib/modules
+        - name: xtables-lock
+          hostPath:
+            path: /run/xtables.lock
+            type: FileOrCreate
+{{- end }}

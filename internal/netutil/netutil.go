@@ -3,6 +3,7 @@
 package netutil
 
 import (
+	"crypto/rand"
 	"errors"
 	"fmt"
 	"net"
@@ -90,6 +91,15 @@ func ConfigureInterface(nsPath, ifName, ipCIDR, gatewayIP string) error {
 	if err != nil {
 		return fmt.Errorf("getting link %q in ns %q: %w", ifName, nsPath, err)
 	}
+
+	mac, err := generateMAC()
+	if err != nil {
+		return err
+	}
+	if err := netlink.LinkSetHardwareAddr(link, mac); err != nil {
+		return fmt.Errorf("setting MAC on %q: %w", ifName, err)
+	}
+
 	if err := netlink.LinkSetUp(link); err != nil {
 		return fmt.Errorf("bringing up %q: %w", ifName, err)
 	}
@@ -212,6 +222,17 @@ func VerifyInterfaceConfig(nsPath, ifName, expectedIPCIDR string) error {
 		}
 	}
 	return fmt.Errorf("interface %q does not have address %q", ifName, expectedIPCIDR)
+}
+
+// generateMAC returns a random locally-administered unicast MAC address.
+func generateMAC() (net.HardwareAddr, error) {
+	buf := make([]byte, 6)
+	if _, err := rand.Read(buf); err != nil {
+		return nil, fmt.Errorf("generating random MAC: %w", err)
+	}
+	// Set locally-administered bit, clear multicast bit
+	buf[0] = (buf[0] | 0x02) & 0xfe
+	return net.HardwareAddr(buf), nil
 }
 
 // isExist returns true for "already exists" errors (EEXIST).
