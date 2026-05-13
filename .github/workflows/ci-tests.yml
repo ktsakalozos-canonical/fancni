@@ -45,6 +45,18 @@ jobs:
           sudo systemctl restart snap.lxd.daemon
           sudo lxd waitready
 
+      - name: Fix Docker/LXD nftables conflict
+        run: |
+          # Docker's nftables FORWARD chain has policy DROP and no rules for LXD traffic.
+          # Add ACCEPT rules in DOCKER-USER (Docker's official extension point) and NAT masquerade.
+          LXD_BRIDGE="lxdbr0"
+          LXD_SUBNET=$(ip -4 addr show "$LXD_BRIDGE" | grep -oP 'inet \K[0-9./]+')
+          LXD_NETWORK=$(python3 -c "import ipaddress; print(ipaddress.ip_network('${LXD_SUBNET}', strict=False))")
+          DEFAULT_IF=$(ip route show default | awk '{print $5; exit}')
+          sudo iptables -I DOCKER-USER -i "$LXD_BRIDGE" -j ACCEPT
+          sudo iptables -I DOCKER-USER -o "$LXD_BRIDGE" -j ACCEPT
+          sudo iptables -t nat -A POSTROUTING -s "$LXD_NETWORK" -o "$DEFAULT_IF" -j MASQUERADE
+
       - name: Add runner to lxd group
         run: sudo usermod -aG lxd "$USER"
 
