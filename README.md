@@ -1,4 +1,4 @@
-# fancni
+# FanCNI
 
 A lightweight Kubernetes CNI plugin that implements Ubuntu Fan networking, enabling flat, routable pod-to-pod connectivity across nodes without an overlay encapsulation overhead.
 
