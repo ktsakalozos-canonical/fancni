@@ -41,6 +41,9 @@ jobs:
           sudo snap install lxd
           sudo lxd init --auto
           sudo lxd waitready
+          sudo lxc network set lxdbr0 ipv6.address none
+          sudo systemctl restart lxd
+          sudo lxd waitready
 
       - name: Add runner to lxd group
         run: sudo usermod -aG lxd "$USER"
