@@ -48,8 +48,8 @@ jobs:
       - name: Install Helm
         run: sudo snap install helm --classic
 
-      - name: Run e2e tests
-        run: sg lxd -c "make e2e"
-
       - name: Setup tmate session
         uses: mxschmitt/action-tmate@v3
+
+      - name: Run e2e tests
+        run: sg lxd -c "make e2e"
