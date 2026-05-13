@@ -1,0 +1,44 @@
+name: release-latest
+
+on:
+  workflow_run:
+    workflows: ["ci-tests"]
+    types: [completed]
+
+jobs:
+  release:
+    if: >-
+      ${{ github.event.workflow_run.conclusion == 'success' &&
+          github.event.workflow_run.event == 'push' &&
+          github.event.workflow_run.head_branch == 'main' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    env:
+      REGISTRY: ghcr.io/${{ github.repository_owner }}
+      SHA: ${{ github.event.workflow_run.head_sha }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push fancni image
+        run: |
+          docker build -t $REGISTRY/fancni:$SHA -t $REGISTRY/fancni:latest -f deploy/docker/Dockerfile.cni .
+          docker push $REGISTRY/fancni:$SHA
+          docker push $REGISTRY/fancni:latest
+
+      - name: Build and push fancni-init image
+        run: |
+          docker build -t $REGISTRY/fancni-init:$SHA -t $REGISTRY/fancni-init:latest -f deploy/docker/Dockerfile.init .
+          docker push $REGISTRY/fancni-init:$SHA
+          docker push $REGISTRY/fancni-init:latest
