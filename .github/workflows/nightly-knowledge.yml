@@ -1,0 +1,456 @@
+name: Nightly Knowledge
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 4 * * *'
+
+jobs:
+  knowledge:
+    runs-on: ubuntu-latest
+    # Only run on the default branch
+    if: github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+
+    permissions:
+      contents: write
+      models: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check for recent commits
+        id: check_commits
+        run: |
+          COUNT=$(git log --since='7 days ago' --oneline | wc -l)
+          echo "commit_count=$COUNT" >> "$GITHUB_OUTPUT"
+
+      - name: Skip if no recent commits
+        if: steps.check_commits.outputs.commit_count == '0'
+        run: |
+          echo "No commits in the last 7 days. Skipping knowledge generation."
+          exit 0
+
+      - name: Gather context
+        if: steps.check_commits.outputs.commit_count != '0'
+        id: context
+        run: |
+          TREE=$(find . -not -path './.git/*' -not -path './_output/*' | head -200)
+          COMMITS=$(git log --since='7 days ago' --pretty=format:'%h %s' --stat | head -c 4000)
+          GOMOD=$(cat go.mod 2>/dev/null || echo "")
+          MAKEFILE=$(head -80 Makefile 2>/dev/null || echo "")
+
+          # Sample a few key source files from internal/ and cmd/
+          INTERNAL_SAMPLES=""
+          for f in $(find internal/ -name '*.go' | head -5 2>/dev/null); do
+            INTERNAL_SAMPLES="${INTERNAL_SAMPLES}
+          === $f ===
+          $(head -80 "$f")
+          "
+          done
+
+          CMD_SAMPLES=""
+          for f in $(find cmd/ -name '*.go' | head -3 2>/dev/null); do
+            CMD_SAMPLES="${CMD_SAMPLES}
+          === $f ===
+          $(head -80 "$f")
+          "
+          done
+
+          {
+            echo "PROJECT_CONTEXT<<ENDOFCONTEXT"
+            echo "=== Project Tree ==="
+            echo "$TREE"
+            echo ""
+            echo "=== Recent Commits (last 7 days) ==="
+            echo "$COMMITS"
+            echo ""
+            echo "=== go.mod ==="
+            echo "$GOMOD"
+            echo ""
+            echo "=== Makefile (first 80 lines) ==="
+            echo "$MAKEFILE"
+            echo ""
+            echo "=== Sample source files from internal/ ==="
+            echo "$INTERNAL_SAMPLES"
+            echo ""
+            echo "=== Sample source files from cmd/ ==="
+            echo "$CMD_SAMPLES"
+            echo "ENDOFCONTEXT"
+          } >> "$GITHUB_ENV"
+
+      - name: Generate architect knowledge
+        if: steps.check_commits.outputs.commit_count != '0'
+        id: architect
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          SYSTEM_PROMPT="You are an expert software architect generating a knowledge reference file for an AI architect agent working on this project.
+          You may refine, update, or build on the prior knowledge provided — keep what is still accurate and update what has changed.
+
+          Focus on:
+          - System boundaries and module responsibilities
+          - Architectural decisions evident in the code
+          - Dependency graph between internal packages
+          - Incomplete or in-progress work (from recent commits and TODOs)
+          - Areas of technical debt
+
+          Output rules:
+          - Output pure markdown, no preamble or meta-commentary
+          - Stay under 500 lines
+          - Be specific and actionable, not generic
+          - Use the actual names, files, and patterns present in this codebase"
+
+          PRIOR_KNOWLEDGE=$(cat misc/knowledge/architect-knowledge.md 2>/dev/null || echo "")
+          if [ -n "$PRIOR_KNOWLEDGE" ]; then
+            USER_MESSAGE="${PROJECT_CONTEXT}
+
+          === Prior Knowledge ===
+          ${PRIOR_KNOWLEDGE}"
+          else
+            USER_MESSAGE="$PROJECT_CONTEXT"
+          fi
+
+          PAYLOAD=$(jq -n \
+            --arg system "$SYSTEM_PROMPT" \
+            --arg user "$USER_MESSAGE" \
+            '{
+              model: "openai/gpt-4.1",
+              messages: [
+                {role: "system", content: $system},
+                {role: "user", content: $user}
+              ],
+              max_tokens: 4096,
+              temperature: 0.3
+            }')
+
+          RESPONSE=$(curl -fsSL \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Content-Type: application/json" \
+            -d "$PAYLOAD" \
+            https://models.github.ai/inference/chat/completions)
+
+          if [ -z "$RESPONSE" ]; then
+            echo "::error::API response is empty (architect)"
+            exit 1
+          fi
+
+          CONTENT=$(echo "$RESPONSE" | jq -r '.choices[0].message.content')
+
+          if [ -z "$CONTENT" ] || [ "$CONTENT" = "null" ]; then
+            echo "::error::API response missing expected content (architect)"
+            exit 1
+          fi
+
+          {
+            echo "ARCHITECT_KNOWLEDGE<<ENDARCHITECT"
+            echo "$CONTENT"
+            echo "ENDARCHITECT"
+          } >> "$GITHUB_ENV"
+
+      - name: Generate developer knowledge
+        if: steps.check_commits.outputs.commit_count != '0'
+        id: developer
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          SYSTEM_PROMPT="You are an expert software engineer generating a knowledge reference file for an AI developer agent working on this project.
+          You may refine, update, or build on the prior knowledge provided — keep what is still accurate and update what has changed.
+
+          Focus on:
+          - Code patterns and idioms used (error handling, logging, configuration)
+          - Naming conventions for files, packages, functions, and variables
+          - Testing patterns and framework usage
+          - Build and run commands
+          - Common gotchas visible in the code that a new developer should know
+
+          Output rules:
+          - Output pure markdown, no preamble or meta-commentary
+          - Stay under 500 lines
+          - Be specific and actionable, not generic
+          - Use the actual names, files, and patterns present in this codebase"
+
+          PRIOR_KNOWLEDGE=$(cat misc/knowledge/developer-knowledge.md 2>/dev/null || echo "")
+          if [ -n "$PRIOR_KNOWLEDGE" ]; then
+            USER_MESSAGE="${PROJECT_CONTEXT}
+
+          === Prior Knowledge ===
+          ${PRIOR_KNOWLEDGE}"
+          else
+            USER_MESSAGE="$PROJECT_CONTEXT"
+          fi
+
+          PAYLOAD=$(jq -n \
+            --arg system "$SYSTEM_PROMPT" \
+            --arg user "$USER_MESSAGE" \
+            '{
+              model: "openai/gpt-4.1",
+              messages: [
+                {role: "system", content: $system},
+                {role: "user", content: $user}
+              ],
+              max_tokens: 4096,
+              temperature: 0.3
+            }')
+
+          RESPONSE=$(curl -fsSL \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Content-Type: application/json" \
+            -d "$PAYLOAD" \
+            https://models.github.ai/inference/chat/completions)
+
+          if [ -z "$RESPONSE" ]; then
+            echo "::error::API response is empty (developer)"
+            exit 1
+          fi
+
+          CONTENT=$(echo "$RESPONSE" | jq -r '.choices[0].message.content')
+
+          if [ -z "$CONTENT" ] || [ "$CONTENT" = "null" ]; then
+            echo "::error::API response missing expected content (developer)"
+            exit 1
+          fi
+
+          {
+            echo "DEVELOPER_KNOWLEDGE<<ENDDEVELOPER"
+            echo "$CONTENT"
+            echo "ENDDEVELOPER"
+          } >> "$GITHUB_ENV"
+
+      - name: Generate code-reviewer knowledge
+        if: steps.check_commits.outputs.commit_count != '0'
+        id: code_reviewer
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          SYSTEM_PROMPT="You are an expert code reviewer generating a knowledge reference file for an AI code-reviewer agent working on this project.
+          You may refine, update, or build on the prior knowledge provided — keep what is still accurate and update what has changed.
+
+          Focus on:
+          - Areas with weak or missing test coverage
+          - Security-sensitive code paths
+          - Code smells or inconsistencies currently present in the codebase
+          - Error handling gaps
+
+          Output rules:
+          - Output pure markdown, no preamble or meta-commentary
+          - Stay under 500 lines
+          - Be specific and actionable, not generic
+          - Use the actual names, files, and patterns present in this codebase"
+
+          PRIOR_KNOWLEDGE=$(cat misc/knowledge/code-reviewer-knowledge.md 2>/dev/null || echo "")
+          if [ -n "$PRIOR_KNOWLEDGE" ]; then
+            USER_MESSAGE="${PROJECT_CONTEXT}
+
+          === Prior Knowledge ===
+          ${PRIOR_KNOWLEDGE}"
+          else
+            USER_MESSAGE="$PROJECT_CONTEXT"
+          fi
+
+          PAYLOAD=$(jq -n \
+            --arg system "$SYSTEM_PROMPT" \
+            --arg user "$USER_MESSAGE" \
+            '{
+              model: "openai/gpt-4.1",
+              messages: [
+                {role: "system", content: $system},
+                {role: "user", content: $user}
+              ],
+              max_tokens: 4096,
+              temperature: 0.3
+            }')
+
+          RESPONSE=$(curl -fsSL \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Content-Type: application/json" \
+            -d "$PAYLOAD" \
+            https://models.github.ai/inference/chat/completions)
+
+          if [ -z "$RESPONSE" ]; then
+            echo "::error::API response is empty (code-reviewer)"
+            exit 1
+          fi
+
+          CONTENT=$(echo "$RESPONSE" | jq -r '.choices[0].message.content')
+
+          if [ -z "$CONTENT" ] || [ "$CONTENT" = "null" ]; then
+            echo "::error::API response missing expected content (code-reviewer)"
+            exit 1
+          fi
+
+          {
+            echo "CODE_REVIEWER_KNOWLEDGE<<ENDREVIEWER"
+            echo "$CONTENT"
+            echo "ENDREVIEWER"
+          } >> "$GITHUB_ENV"
+
+      - name: Generate code-reviewerer knowledge
+        if: steps.check_commits.outputs.commit_count != '0'
+        id: code_reviewerer
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          SYSTEM_PROMPT="You are an expert code reviewer generating a knowledge reference file for an AI code-reviewerer agent working on this project.
+          You may refine, update, or build on the prior knowledge provided — keep what is still accurate and update what has changed.
+
+          Focus on:
+          - Edge cases that are not handled or tested
+          - Race conditions and concurrency hazards
+          - Resource leaks (goroutines, file handles, connections)
+          - Maintainability concerns: overly complex logic, poor abstractions, hidden coupling
+
+          Output rules:
+          - Output pure markdown, no preamble or meta-commentary
+          - Stay under 500 lines
+          - Be specific and actionable, not generic
+          - Use the actual names, files, and patterns present in this codebase"
+
+          PRIOR_KNOWLEDGE=$(cat misc/knowledge/code-reviewerer-knowledge.md 2>/dev/null || echo "")
+          if [ -n "$PRIOR_KNOWLEDGE" ]; then
+            USER_MESSAGE="${PROJECT_CONTEXT}
+
+          === Prior Knowledge ===
+          ${PRIOR_KNOWLEDGE}"
+          else
+            USER_MESSAGE="$PROJECT_CONTEXT"
+          fi
+
+          PAYLOAD=$(jq -n \
+            --arg system "$SYSTEM_PROMPT" \
+            --arg user "$USER_MESSAGE" \
+            '{
+              model: "openai/gpt-4.1",
+              messages: [
+                {role: "system", content: $system},
+                {role: "user", content: $user}
+              ],
+              max_tokens: 4096,
+              temperature: 0.3
+            }')
+
+          RESPONSE=$(curl -fsSL \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Content-Type: application/json" \
+            -d "$PAYLOAD" \
+            https://models.github.ai/inference/chat/completions)
+
+          if [ -z "$RESPONSE" ]; then
+            echo "::error::API response is empty (code-reviewerer)"
+            exit 1
+          fi
+
+          CONTENT=$(echo "$RESPONSE" | jq -r '.choices[0].message.content')
+
+          if [ -z "$CONTENT" ] || [ "$CONTENT" = "null" ]; then
+            echo "::error::API response missing expected content (code-reviewerer)"
+            exit 1
+          fi
+
+          {
+            echo "CODE_REVIEWERER_KNOWLEDGE<<ENDREVIEWERER"
+            echo "$CONTENT"
+            echo "ENDREVIEWERER"
+          } >> "$GITHUB_ENV"
+
+      - name: Generate repo-scout knowledge
+        if: steps.check_commits.outputs.commit_count != '0'
+        id: repo_scout
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          SYSTEM_PROMPT="You are an expert repository analyst generating a knowledge reference file for an AI repo-scout agent working on this project.
+          You may refine, update, or build on the prior knowledge provided — keep what is still accurate and update what has changed.
+
+          Focus on:
+          - Dependency list with versions (from go.mod and any other manifests)
+          - Build and deploy tooling state (Makefile targets, scripts, Docker, CI)
+          - CI workflow inventory (what workflows exist and what they do)
+          - Project structure map with hotspots (most-changed or most-critical directories/files)
+
+          Output rules:
+          - Output pure markdown, no preamble or meta-commentary
+          - Stay under 500 lines
+          - Be specific and actionable, not generic
+          - Use the actual names, files, and patterns present in this codebase"
+
+          PRIOR_KNOWLEDGE=$(cat misc/knowledge/repo-scout-knowledge.md 2>/dev/null || echo "")
+          if [ -n "$PRIOR_KNOWLEDGE" ]; then
+            USER_MESSAGE="${PROJECT_CONTEXT}
+
+          === Prior Knowledge ===
+          ${PRIOR_KNOWLEDGE}"
+          else
+            USER_MESSAGE="$PROJECT_CONTEXT"
+          fi
+
+          PAYLOAD=$(jq -n \
+            --arg system "$SYSTEM_PROMPT" \
+            --arg user "$USER_MESSAGE" \
+            '{
+              model: "openai/gpt-4.1",
+              messages: [
+                {role: "system", content: $system},
+                {role: "user", content: $user}
+              ],
+              max_tokens: 4096,
+              temperature: 0.3
+            }')
+
+          RESPONSE=$(curl -fsSL \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Content-Type: application/json" \
+            -d "$PAYLOAD" \
+            https://models.github.ai/inference/chat/completions)
+
+          if [ -z "$RESPONSE" ]; then
+            echo "::error::API response is empty (repo-scout)"
+            exit 1
+          fi
+
+          CONTENT=$(echo "$RESPONSE" | jq -r '.choices[0].message.content')
+
+          if [ -z "$CONTENT" ] || [ "$CONTENT" = "null" ]; then
+            echo "::error::API response missing expected content (repo-scout)"
+            exit 1
+          fi
+
+          {
+            echo "REPO_SCOUT_KNOWLEDGE<<ENDSCOUT"
+            echo "$CONTENT"
+            echo "ENDSCOUT"
+          } >> "$GITHUB_ENV"
+
+      - name: Write knowledge files
+        if: steps.check_commits.outputs.commit_count != '0'
+        run: |
+          mkdir -p misc/knowledge
+
+          write_knowledge() {
+            local agent="$1"
+            local content="$2"
+            local outfile="misc/knowledge/${agent}-knowledge.md"
+            printf '%s\n' "$content" | head -500 > "$outfile"
+            echo "Wrote $outfile"
+          }
+
+          write_knowledge "architect"      "$ARCHITECT_KNOWLEDGE"
+          write_knowledge "developer"      "$DEVELOPER_KNOWLEDGE"
+          write_knowledge "code-reviewer"  "$CODE_REVIEWER_KNOWLEDGE"
+          write_knowledge "code-reviewerer" "$CODE_REVIEWERER_KNOWLEDGE"
+          write_knowledge "repo-scout"     "$REPO_SCOUT_KNOWLEDGE"
+
+      - name: Commit and push
+        if: steps.check_commits.outputs.commit_count != '0'
+        run: |
+          git config user.name "Knowledge Bot"
+          git config user.email "knowledge-bot@users.noreply.github.com"
+          git add misc/knowledge/
+          if ! git diff --cached --quiet; then
+            git commit -m "knowledge-bot: update agent knowledge files [skip ci]"
+            git push
+          else
+            echo "No changes to knowledge files. Skipping commit."
+          fi

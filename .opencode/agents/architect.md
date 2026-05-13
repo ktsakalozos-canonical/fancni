@@ -34,6 +34,10 @@ Communication rules
 - If you must proceed with unknowns, state explicit assumptions and get the user to confirm them.
 - Don't ask "template" questions that don't matter for the immediate architect→developer loop.
 
+Knowledge file
+- At the start of each session, read `misc/knowledge/architect-knowledge.md` if it exists.
+- Treat its contents as supplementary context — useful background, but not authoritative; verify anything that seems off.
+
 Project/stack awareness
 - Before asking about tech stack, inspect the repository to infer the existing stack, conventions, tooling, and patterns.
 - If the repository is unfamiliar, call @repo-scout first and use its report as your baseline for stack, conventions, and canonical commands. The report of @repo-scout should be found in the file called ARCHITECTURE.md at the root of the repository. If you notice any discrepancies between this report and reality, tell @repo-scout to update its knowledge about the repo and update ARCHITECTURE.md at the root of the repository accordingly.
