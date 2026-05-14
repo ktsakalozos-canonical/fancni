@@ -24,8 +24,9 @@ spec:
         {{- toYaml .Values.tolerations | nindent 8 }}
       initContainers:
         - name: node-init
-          image: "{{ .Values.images.init.repository }}:{{ .Values.images.init.tag }}"
-          imagePullPolicy: {{ .Values.images.init.pullPolicy }}
+          image: "{{ .Values.images.fancni.repository }}:{{ .Values.images.fancni.tag }}"
+          imagePullPolicy: {{ .Values.images.fancni.pullPolicy }}
+          command: ["/init-node.sh"]
           securityContext:
             privileged: true
           env:
@@ -40,8 +41,9 @@ spec:
               mountPath: /host
       containers:
         - name: install-cni
-          image: "{{ .Values.images.cni.repository }}:{{ .Values.images.cni.tag }}"
-          imagePullPolicy: {{ .Values.images.cni.pullPolicy }}
+          image: "{{ .Values.images.fancni.repository }}:{{ .Values.images.fancni.tag }}"
+          imagePullPolicy: {{ .Values.images.fancni.pullPolicy }}
+          command: ["/install-cni.sh"]
           env:
             - name: CNI_CONF
               valueFrom:
