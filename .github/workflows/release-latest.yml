@@ -7,6 +7,7 @@ on:
 
 jobs:
   release:
+    name: Release
     if: >-
       ${{ github.event.workflow_run.conclusion == 'success' &&
           github.event.workflow_run.event == 'push' &&
@@ -24,21 +25,28 @@ jobs:
         with:
           ref: ${{ github.event.workflow_run.head_sha }}
 
-      - name: Log in to GHCR
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Install Rockcraft
+        run: sudo snap install rockcraft --classic
 
-      - name: Build and push fancni image
+      - name: Install LXD
         run: |
-          docker build -t $REGISTRY/fancni:$SHA -t $REGISTRY/fancni:latest -f deploy/docker/Dockerfile.cni .
-          docker push $REGISTRY/fancni:$SHA
-          docker push $REGISTRY/fancni:latest
+          sudo snap install lxd
+          sudo lxd init --auto
+          sudo lxd waitready
 
-      - name: Build and push fancni-init image
+      - name: Add runner to lxd group
+        run: sudo usermod -aG lxd "$USER"
+
+      - name: Build rock
+        run: sg lxd -c "rockcraft pack"
+
+      - name: Push rock to GHCR
         run: |
-          docker build -t $REGISTRY/fancni-init:$SHA -t $REGISTRY/fancni-init:latest -f deploy/docker/Dockerfile.init .
-          docker push $REGISTRY/fancni-init:$SHA
-          docker push $REGISTRY/fancni-init:latest
+          rockcraft.skopeo --insecure-policy copy \
+            --dest-creds "${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}" \
+            oci-archive:fancni_0.1_amd64.rock \
+            "docker://${REGISTRY}/fancni:${SHA}"
+          rockcraft.skopeo --insecure-policy copy \
+            --dest-creds "${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}" \
+            oci-archive:fancni_0.1_amd64.rock \
+            "docker://${REGISTRY}/fancni:latest"
