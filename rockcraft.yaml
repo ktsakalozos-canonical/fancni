@@ -1,0 +1,44 @@
+name: fancni
+summary: Fan networking CNI plugin for Kubernetes
+description: |
+  A single rock image containing the fancni CNI binary and deployment scripts.
+  The pod spec selects behavior via command overrides.
+version: "0.1"
+base: ubuntu@24.04
+build-base: ubuntu@24.04
+license: Apache-2.0
+
+platforms:
+  amd64:
+
+parts:
+  fancni-binary:
+    plugin: go
+    source: .
+    build-snaps:
+      - go/1.24/stable
+    organize:
+      bin/fancni: fancni
+    stage:
+      - fancni
+
+  scripts:
+    plugin: dump
+    source: deploy/scripts
+    organize:
+      install-cni.sh: install-cni.sh
+      init-node.sh: init-node.sh
+    override-build: |
+      craftctl default
+      chmod 0755 ${CRAFT_PART_INSTALL}/install-cni.sh
+      chmod 0755 ${CRAFT_PART_INSTALL}/init-node.sh
+    stage:
+      - install-cni.sh
+      - init-node.sh
+
+  apt-packages:
+    plugin: nil
+    stage-packages:
+      - iptables
+      - iproute2
+      - kmod

@@ -136,18 +136,33 @@ wait_for 300 "both nodes visible" bash -c \
   "lxc exec ${NODE1} -- sudo k8s kubectl get nodes 2>/dev/null | grep -c Ready | grep -qE '^[2-9]'"
 
 # ---------------------------------------------------------------------------
-# Phase 6 – Build fancni images on the host
+# Phase 6 – Build fancni rock on the host
 # ---------------------------------------------------------------------------
-log "=== Phase 6: Building fancni images on host ==="
-make -C "${REPO_ROOT}" docker-build
+log "=== Phase 6: Building fancni rock on host ==="
+make -C "${REPO_ROOT}" rock-build
 
 # ---------------------------------------------------------------------------
 # Phase 7 – Transfer images into VMs
 # ---------------------------------------------------------------------------
 log "=== Phase 7: Transferring images into VMs ==="
+
+# Import fancni rock into both VMs
+ROCK_FILE="${REPO_ROOT}/fancni_0.1_amd64.rock"
+for VM in "${NODE1}" "${NODE2}"; do
+  log "  Pushing rock to ${VM}..."
+  lxc file push "${ROCK_FILE}" "${VM}/tmp/fancni_0.1_amd64.rock"
+  log "  Importing rock into ${VM}..."
+  lxc_exec "${VM}" "${CTR_BIN}" --address "${CTR_SOCK}" -n "${CTR_NS}" \
+    images import --all-platforms --base-name "ghcr.io/ktsakalozos-canonical/fancni" /tmp/fancni_0.1_amd64.rock
+  log "  Re-tagging fancni image in ${VM}..."
+  lxc_exec "${VM}" "${CTR_BIN}" --address "${CTR_SOCK}" -n "${CTR_NS}" \
+    images tag "ghcr.io/ktsakalozos-canonical/fancni:0.1" "ghcr.io/ktsakalozos-canonical/fancni:latest"
+done
+
+# Pull and import external images via docker
 docker pull nginx:latest
 docker pull cloudnativelabs/kube-router:v2.9.0
-for IMAGE in "fancni:latest" "fancni-init:latest" "nginx:latest" "cloudnativelabs/kube-router:v2.9.0"; do
+for IMAGE in "nginx:latest" "cloudnativelabs/kube-router:v2.9.0"; do
   for VM in "${NODE1}" "${NODE2}"; do
     log "  Importing ${IMAGE} into ${VM}..."
     docker save "${IMAGE}" | lxc exec "${VM}" -- \
@@ -156,15 +171,6 @@ for IMAGE in "fancni:latest" "fancni-init:latest" "nginx:latest" "cloudnativelab
         -n "${CTR_NS}" \
         images import -
   done
-done
-
-# Re-tag fancni images to match Helm chart references
-for VM in "${NODE1}" "${NODE2}"; do
-  log "  Re-tagging images in ${VM}..."
-  lxc exec "${VM}" -- "${CTR_BIN}" --address "${CTR_SOCK}" -n "${CTR_NS}" \
-    images tag "docker.io/library/fancni:latest" "ghcr.io/ktsakalozos-canonical/fancni:latest"
-  lxc exec "${VM}" -- "${CTR_BIN}" --address "${CTR_SOCK}" -n "${CTR_NS}" \
-    images tag "docker.io/library/fancni-init:latest" "ghcr.io/ktsakalozos-canonical/fancni-init:latest"
 done
 
 # ---------------------------------------------------------------------------

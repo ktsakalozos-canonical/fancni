@@ -5,12 +5,8 @@ underlay:
   prefix: 16
 
 images:
-  cni:
+  fancni:
     repository: ghcr.io/ktsakalozos-canonical/fancni
-    tag: latest
-    pullPolicy: IfNotPresent
-  init:
-    repository: ghcr.io/ktsakalozos-canonical/fancni-init
     tag: latest
     pullPolicy: IfNotPresent
 

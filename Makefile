@@ -1,4 +1,4 @@
-.PHONY: build test clean docker-build docker-build-cni docker-build-init helm-template helm-lint e2e
+.PHONY: build test clean docker-build docker-build-cni docker-build-init helm-template helm-lint e2e rock-build
 
 build:
 	go build -o _output/bin/fancni ./cmd/fancni/
@@ -16,6 +16,9 @@ docker-build-init:
 	docker build -t fancni-init:latest -f deploy/docker/Dockerfile.init .
 
 docker-build: docker-build-cni docker-build-init
+
+rock-build:
+	rockcraft pack
 
 helm-template:
 	helm template fancni deploy/helm/fancni/
