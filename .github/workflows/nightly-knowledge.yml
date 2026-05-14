@@ -126,7 +126,36 @@ jobs:
               temperature: 0.3
             }')
 
-          RESPONSE=$(curl -fsSL \
+          retry_curl() {
+            local max_retries=3
+            local delay=10
+            for i in $(seq 1 "$max_retries"); do
+              HTTP_CODE=$(curl -sL -w '%{http_code}' -o /tmp/curl_response_$$.json \
+                "$@")
+              if [ -z "$HTTP_CODE" ] || [ "$HTTP_CODE" = "000" ]; then
+                echo "::warning::curl failed (no HTTP response, attempt $i/$max_retries). Retrying in ${delay}s..."
+                sleep "$delay"
+                delay=$((delay * 2))
+                continue
+              fi
+              if [ "$HTTP_CODE" -eq 200 ]; then
+                cat /tmp/curl_response_$$.json
+                return 0
+              elif [ "$HTTP_CODE" -eq 429 ]; then
+                echo "::warning::Got 429 (attempt $i/$max_retries). Retrying in ${delay}s..."
+                sleep "$delay"
+                delay=$((delay * 2))
+              else
+                echo "::error::HTTP $HTTP_CODE from API"
+                cat /tmp/curl_response_$$.json >&2
+                return 1
+              fi
+            done
+            echo "::error::Exhausted retries (last HTTP $HTTP_CODE)"
+            return 1
+          }
+
+          RESPONSE=$(retry_curl \
             -H "Authorization: Bearer $GH_TOKEN" \
             -H "Content-Type: application/json" \
             -d "$PAYLOAD" \
@@ -195,7 +224,36 @@ jobs:
               temperature: 0.3
             }')
 
-          RESPONSE=$(curl -fsSL \
+          retry_curl() {
+            local max_retries=3
+            local delay=10
+            for i in $(seq 1 "$max_retries"); do
+              HTTP_CODE=$(curl -sL -w '%{http_code}' -o /tmp/curl_response_$$.json \
+                "$@")
+              if [ -z "$HTTP_CODE" ] || [ "$HTTP_CODE" = "000" ]; then
+                echo "::warning::curl failed (no HTTP response, attempt $i/$max_retries). Retrying in ${delay}s..."
+                sleep "$delay"
+                delay=$((delay * 2))
+                continue
+              fi
+              if [ "$HTTP_CODE" -eq 200 ]; then
+                cat /tmp/curl_response_$$.json
+                return 0
+              elif [ "$HTTP_CODE" -eq 429 ]; then
+                echo "::warning::Got 429 (attempt $i/$max_retries). Retrying in ${delay}s..."
+                sleep "$delay"
+                delay=$((delay * 2))
+              else
+                echo "::error::HTTP $HTTP_CODE from API"
+                cat /tmp/curl_response_$$.json >&2
+                return 1
+              fi
+            done
+            echo "::error::Exhausted retries (last HTTP $HTTP_CODE)"
+            return 1
+          }
+
+          RESPONSE=$(retry_curl \
             -H "Authorization: Bearer $GH_TOKEN" \
             -H "Content-Type: application/json" \
             -d "$PAYLOAD" \
@@ -263,7 +321,36 @@ jobs:
               temperature: 0.3
             }')
 
-          RESPONSE=$(curl -fsSL \
+          retry_curl() {
+            local max_retries=3
+            local delay=10
+            for i in $(seq 1 "$max_retries"); do
+              HTTP_CODE=$(curl -sL -w '%{http_code}' -o /tmp/curl_response_$$.json \
+                "$@")
+              if [ -z "$HTTP_CODE" ] || [ "$HTTP_CODE" = "000" ]; then
+                echo "::warning::curl failed (no HTTP response, attempt $i/$max_retries). Retrying in ${delay}s..."
+                sleep "$delay"
+                delay=$((delay * 2))
+                continue
+              fi
+              if [ "$HTTP_CODE" -eq 200 ]; then
+                cat /tmp/curl_response_$$.json
+                return 0
+              elif [ "$HTTP_CODE" -eq 429 ]; then
+                echo "::warning::Got 429 (attempt $i/$max_retries). Retrying in ${delay}s..."
+                sleep "$delay"
+                delay=$((delay * 2))
+              else
+                echo "::error::HTTP $HTTP_CODE from API"
+                cat /tmp/curl_response_$$.json >&2
+                return 1
+              fi
+            done
+            echo "::error::Exhausted retries (last HTTP $HTTP_CODE)"
+            return 1
+          }
+
+          RESPONSE=$(retry_curl \
             -H "Authorization: Bearer $GH_TOKEN" \
             -H "Content-Type: application/json" \
             -d "$PAYLOAD" \
@@ -331,7 +418,36 @@ jobs:
               temperature: 0.3
             }')
 
-          RESPONSE=$(curl -fsSL \
+          retry_curl() {
+            local max_retries=3
+            local delay=10
+            for i in $(seq 1 "$max_retries"); do
+              HTTP_CODE=$(curl -sL -w '%{http_code}' -o /tmp/curl_response_$$.json \
+                "$@")
+              if [ -z "$HTTP_CODE" ] || [ "$HTTP_CODE" = "000" ]; then
+                echo "::warning::curl failed (no HTTP response, attempt $i/$max_retries). Retrying in ${delay}s..."
+                sleep "$delay"
+                delay=$((delay * 2))
+                continue
+              fi
+              if [ "$HTTP_CODE" -eq 200 ]; then
+                cat /tmp/curl_response_$$.json
+                return 0
+              elif [ "$HTTP_CODE" -eq 429 ]; then
+                echo "::warning::Got 429 (attempt $i/$max_retries). Retrying in ${delay}s..."
+                sleep "$delay"
+                delay=$((delay * 2))
+              else
+                echo "::error::HTTP $HTTP_CODE from API"
+                cat /tmp/curl_response_$$.json >&2
+                return 1
+              fi
+            done
+            echo "::error::Exhausted retries (last HTTP $HTTP_CODE)"
+            return 1
+          }
+
+          RESPONSE=$(retry_curl \
             -H "Authorization: Bearer $GH_TOKEN" \
             -H "Content-Type: application/json" \
             -d "$PAYLOAD" \
@@ -399,7 +515,36 @@ jobs:
               temperature: 0.3
             }')
 
-          RESPONSE=$(curl -fsSL \
+          retry_curl() {
+            local max_retries=3
+            local delay=10
+            for i in $(seq 1 "$max_retries"); do
+              HTTP_CODE=$(curl -sL -w '%{http_code}' -o /tmp/curl_response_$$.json \
+                "$@")
+              if [ -z "$HTTP_CODE" ] || [ "$HTTP_CODE" = "000" ]; then
+                echo "::warning::curl failed (no HTTP response, attempt $i/$max_retries). Retrying in ${delay}s..."
+                sleep "$delay"
+                delay=$((delay * 2))
+                continue
+              fi
+              if [ "$HTTP_CODE" -eq 200 ]; then
+                cat /tmp/curl_response_$$.json
+                return 0
+              elif [ "$HTTP_CODE" -eq 429 ]; then
+                echo "::warning::Got 429 (attempt $i/$max_retries). Retrying in ${delay}s..."
+                sleep "$delay"
+                delay=$((delay * 2))
+              else
+                echo "::error::HTTP $HTTP_CODE from API"
+                cat /tmp/curl_response_$$.json >&2
+                return 1
+              fi
+            done
+            echo "::error::Exhausted retries (last HTTP $HTTP_CODE)"
+            return 1
+          }
+
+          RESPONSE=$(retry_curl \
             -H "Authorization: Bearer $GH_TOKEN" \
             -H "Content-Type: application/json" \
             -d "$PAYLOAD" \
