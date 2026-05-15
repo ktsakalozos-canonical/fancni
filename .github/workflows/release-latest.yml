@@ -4,26 +4,28 @@ on:
   workflow_run:
     workflows: ["ci-tests"]
     types: [completed]
+  workflow_dispatch:
 
 jobs:
   release:
     name: Release
     if: >-
-      ${{ github.event.workflow_run.conclusion == 'success' &&
-          github.event.workflow_run.event == 'push' &&
-          github.event.workflow_run.head_branch == 'main' }}
+      ${{ (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main') ||
+          (github.event.workflow_run.conclusion == 'success' &&
+           github.event.workflow_run.event == 'push' &&
+           github.event.workflow_run.head_branch == 'main') }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
     env:
       REGISTRY: ghcr.io/${{ github.repository_owner }}
-      SHA: ${{ github.event.workflow_run.head_sha }}
+      SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.workflow_run.head_sha }}
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
 
       - name: Install Rockcraft
         run: sudo snap install rockcraft --classic
@@ -33,6 +35,11 @@ jobs:
           sudo snap install lxd
           sudo lxd init --auto
           sudo lxd waitready
+
+      - name: Configure LXD network
+        run: |
+          sudo iptables -P FORWARD ACCEPT
+          sudo lxc network set lxdbr0 ipv4.address=10.10.10.1/24 ipv4.nat=true
 
       - name: Add runner to lxd group
         run: sudo usermod -aG lxd "$USER"
