@@ -117,7 +117,7 @@ jobs:
             --arg system "$SYSTEM_PROMPT" \
             --arg user "$USER_MESSAGE" \
             '{
-              model: "openai/gpt-4.1",
+              model: "openai/gpt-4o-mini",
               messages: [
                 {role: "system", content: $system},
                 {role: "user", content: $user}
@@ -215,7 +215,7 @@ jobs:
             --arg system "$SYSTEM_PROMPT" \
             --arg user "$USER_MESSAGE" \
             '{
-              model: "openai/gpt-4.1",
+              model: "openai/gpt-4o-mini",
               messages: [
                 {role: "system", content: $system},
                 {role: "user", content: $user}
@@ -312,7 +312,7 @@ jobs:
             --arg system "$SYSTEM_PROMPT" \
             --arg user "$USER_MESSAGE" \
             '{
-              model: "openai/gpt-4.1",
+              model: "openai/gpt-4o-mini",
               messages: [
                 {role: "system", content: $system},
                 {role: "user", content: $user}
@@ -409,7 +409,7 @@ jobs:
             --arg system "$SYSTEM_PROMPT" \
             --arg user "$USER_MESSAGE" \
             '{
-              model: "openai/gpt-4.1",
+              model: "openai/gpt-4o-mini",
               messages: [
                 {role: "system", content: $system},
                 {role: "user", content: $user}
@@ -506,7 +506,7 @@ jobs:
             --arg system "$SYSTEM_PROMPT" \
             --arg user "$USER_MESSAGE" \
             '{
-              model: "openai/gpt-4.1",
+              model: "openai/gpt-4o-mini",
               messages: [
                 {role: "system", content: $system},
                 {role: "user", content: $user}
