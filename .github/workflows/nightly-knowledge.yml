@@ -37,27 +37,10 @@ jobs:
         if: steps.check_commits.outputs.commit_count != '0'
         id: context
         run: |
-          TREE=$(find . -not -path './.git/*' -not -path './_output/*' | head -200)
-          COMMITS=$(git log --since='7 days ago' --pretty=format:'%h %s' --stat | head -c 4000)
-          GOMOD=$(cat go.mod 2>/dev/null || echo "")
-          MAKEFILE=$(head -80 Makefile 2>/dev/null || echo "")
-
-          # Sample a few key source files from internal/ and cmd/
-          INTERNAL_SAMPLES=""
-          for f in $(find internal/ -name '*.go' | head -5 2>/dev/null); do
-            INTERNAL_SAMPLES="${INTERNAL_SAMPLES}
-          === $f ===
-          $(head -80 "$f")
-          "
-          done
-
-          CMD_SAMPLES=""
-          for f in $(find cmd/ -name '*.go' | head -3 2>/dev/null); do
-            CMD_SAMPLES="${CMD_SAMPLES}
-          === $f ===
-          $(head -80 "$f")
-          "
-          done
+          TREE=$(find . -not -path './.git/*' -not -path './_output/*' -not -path './vendor/*' -not -path './misc/*' | head -80)
+          COMMITS=$(git log --since='7 days ago' --pretty=format:'%h %s' | head -30)
+          GOMOD=$(head -30 go.mod 2>/dev/null || echo "")
+          MAKEFILE=$(head -40 Makefile 2>/dev/null || echo "")
 
           {
             echo "PROJECT_CONTEXT<<ENDOFCONTEXT"
@@ -67,17 +50,11 @@ jobs:
             echo "=== Recent Commits (last 7 days) ==="
             echo "$COMMITS"
             echo ""
-            echo "=== go.mod ==="
+            echo "=== go.mod (top 30 lines) ==="
             echo "$GOMOD"
             echo ""
-            echo "=== Makefile (first 80 lines) ==="
+            echo "=== Makefile (first 40 lines) ==="
             echo "$MAKEFILE"
-            echo ""
-            echo "=== Sample source files from internal/ ==="
-            echo "$INTERNAL_SAMPLES"
-            echo ""
-            echo "=== Sample source files from cmd/ ==="
-            echo "$CMD_SAMPLES"
             echo "ENDOFCONTEXT"
           } >> "$GITHUB_ENV"
 
@@ -103,7 +80,7 @@ jobs:
           - Be specific and actionable, not generic
           - Use the actual names, files, and patterns present in this codebase"
 
-          PRIOR_KNOWLEDGE=$(cat misc/knowledge/architect-knowledge.md 2>/dev/null || echo "")
+          PRIOR_KNOWLEDGE=$(head -100 misc/knowledge/architect-knowledge.md 2>/dev/null || echo "")
           if [ -n "$PRIOR_KNOWLEDGE" ]; then
             USER_MESSAGE="${PROJECT_CONTEXT}
 
@@ -122,7 +99,7 @@ jobs:
                 {role: "system", content: $system},
                 {role: "user", content: $user}
               ],
-              max_tokens: 4096,
+              max_tokens: 2048,
               temperature: 0.3
             }')
 
@@ -201,7 +178,7 @@ jobs:
           - Be specific and actionable, not generic
           - Use the actual names, files, and patterns present in this codebase"
 
-          PRIOR_KNOWLEDGE=$(cat misc/knowledge/developer-knowledge.md 2>/dev/null || echo "")
+          PRIOR_KNOWLEDGE=$(head -100 misc/knowledge/developer-knowledge.md 2>/dev/null || echo "")
           if [ -n "$PRIOR_KNOWLEDGE" ]; then
             USER_MESSAGE="${PROJECT_CONTEXT}
 
@@ -220,7 +197,7 @@ jobs:
                 {role: "system", content: $system},
                 {role: "user", content: $user}
               ],
-              max_tokens: 4096,
+              max_tokens: 2048,
               temperature: 0.3
             }')
 
@@ -298,7 +275,7 @@ jobs:
           - Be specific and actionable, not generic
           - Use the actual names, files, and patterns present in this codebase"
 
-          PRIOR_KNOWLEDGE=$(cat misc/knowledge/code-reviewer-knowledge.md 2>/dev/null || echo "")
+          PRIOR_KNOWLEDGE=$(head -100 misc/knowledge/code-reviewer-knowledge.md 2>/dev/null || echo "")
           if [ -n "$PRIOR_KNOWLEDGE" ]; then
             USER_MESSAGE="${PROJECT_CONTEXT}
 
@@ -317,7 +294,7 @@ jobs:
                 {role: "system", content: $system},
                 {role: "user", content: $user}
               ],
-              max_tokens: 4096,
+              max_tokens: 2048,
               temperature: 0.3
             }')
 
@@ -395,7 +372,7 @@ jobs:
           - Be specific and actionable, not generic
           - Use the actual names, files, and patterns present in this codebase"
 
-          PRIOR_KNOWLEDGE=$(cat misc/knowledge/code-reviewerer-knowledge.md 2>/dev/null || echo "")
+          PRIOR_KNOWLEDGE=$(head -100 misc/knowledge/code-reviewerer-knowledge.md 2>/dev/null || echo "")
           if [ -n "$PRIOR_KNOWLEDGE" ]; then
             USER_MESSAGE="${PROJECT_CONTEXT}
 
@@ -414,7 +391,7 @@ jobs:
                 {role: "system", content: $system},
                 {role: "user", content: $user}
               ],
-              max_tokens: 4096,
+              max_tokens: 2048,
               temperature: 0.3
             }')
 
@@ -492,7 +469,7 @@ jobs:
           - Be specific and actionable, not generic
           - Use the actual names, files, and patterns present in this codebase"
 
-          PRIOR_KNOWLEDGE=$(cat misc/knowledge/repo-scout-knowledge.md 2>/dev/null || echo "")
+          PRIOR_KNOWLEDGE=$(head -100 misc/knowledge/repo-scout-knowledge.md 2>/dev/null || echo "")
           if [ -n "$PRIOR_KNOWLEDGE" ]; then
             USER_MESSAGE="${PROJECT_CONTEXT}
 
@@ -511,7 +488,7 @@ jobs:
                 {role: "system", content: $system},
                 {role: "user", content: $user}
               ],
-              max_tokens: 4096,
+              max_tokens: 2048,
               temperature: 0.3
             }')
 
