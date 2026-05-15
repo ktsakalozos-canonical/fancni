@@ -99,70 +99,10 @@
 
 ## Actionable Recommendations
 
-- **IPAM:** Plan migration to distributed IPAM for multi-node support.
-- **Observability:** Add Prometheus metrics and structured logging.
-- **Error Handling:** Implement rollback/cleanup for partial failures.
-- **Testing:** Expand Go-based integration tests; reduce reliance on shell scripts.
-- **Helm Chart:** Add validation, templating, and upgrade hooks.
-- **Fanctl:** Consider vendoring or containerizing fanctl for portability.
-- **Iptables:** Abstract iptables logic for future nftables support.
-- **Config:** Add schema validation and support for dynamic reloads.
-
-## References to In-progress/Planning
-
-- `misc/nightly-dreams/*`: Contains architectural dreams and planning for scalability, modularity, automation, observability, maintainability, integration, validation, performance, security, testing, prioritization.
-- `misc/coding-team/e2e-test/*`: Tracks e2e test improvements, bug fixes, and coverage expansion.
-- `.github/workflows/nightly-knowledge.yml`: Knowledge distillation workflow for automated architectural documentation.
-- `.github/workflows/nightly-dreams.yml`: Nightly architectural planning and prioritization.
-
----
-
-## Internal Package Summary
-
-| Package         | Responsibility                                   | Key Files                     |
-|-----------------|--------------------------------------------------|-------------------------------|
-| `cmd/fancni`    | Entrypoint, logging, CNI dispatch                | `main.go`                     |
-| `internal/config` | CNI config parsing/validation                  | `config.go`, `config_test.go` |
-| `internal/fan`  | Fan math, bridge setup, overlay/underlay mapping | `fan.go`, `fanctl.go`         |
-| `internal/ipam` | IP allocation, file-backed state                 | `ipam.go`, `file_ipam.go`     |
-| `internal/netutil` | Netlink helpers                              | `netutil.go`                  |
-| `internal/iptables` | Iptables rules management                    | `iptables.go`                 |
-| `internal/cni`  | CNI plugin logic (ADD/DEL/CHECK/VERSION)         | `plugin.go`                   |
-
----
-
-## Key Architectural Patterns
-
-- **Pure Functions:** Fan math is stateless and testable.
-- **File Locking:** IPAM uses exclusive file locks for concurrency.
-- **Idempotency:** IPAM allocation is idempotent per containerID.
-- **Error Propagation:** All errors bubble up to CNI error JSON.
-- **Single Responsibility:** Internal packages are focused and decoupled.
-
----
-
-## Areas for Immediate Attention
-
-- **Distributed IPAM:** Needed for multi-node Kubernetes clusters.
-- **Observability:** Metrics and structured logs for production readiness.
-- **Testing:** Robust integration tests for all CNI lifecycle events.
-- **Fanctl Portability:** Ensure fanctl is available in all deployment environments.
-- **Helm Chart:** Improve for production deployment (validation, upgrades).
-
----
-
-## Recent Architectural Changes
-
-- **E2E Testing:** Major expansion in shell-based e2e tests; coverage for cross-node, containerd, HTTP retries, image pulls.
-- **Knowledge Distillation:** Automated workflows for architectural documentation.
-- **Modularity Planning:** Nightly dreams and planning files outline future refactoring and modularity improvements.
-
----
-
-## TODOs & Planning References
-
-- See `misc/nightly-dreams/*` for modularity, scalability, observability, automation, integration, maintainability, validation, performance, security, testing, prioritization.
-- See `misc/coding-team/e2e-test/*` for e2e test improvements and bugfixes.
-- See `.github/workflows/nightly-knowledge.yml` for automated architectural knowledge updates.
-
----
+1. **Enhance IPAM:** Develop a distributed IPAM solution to support multi-node environments.
+2. **Implement Error Recovery:** Introduce rollback mechanisms for ADD/DEL operations to handle partial failures gracefully.
+3. **Abstract Iptables:** Create an abstraction layer for nftables to future-proof the plugin.
+4. **Improve Logging:** Implement log rotation and configurable log levels for better management.
+5. **Dynamic Configuration:** Enable dynamic reloading of configuration to allow changes without restarting the plugin.
+6. **Refactor Testing:** Transition E2E tests from shell scripts to Go-based tests for better reliability and maintainability.
+7. **Expand Documentation:** Improve user-facing documentation to cover installation, configuration, and troubleshooting.
