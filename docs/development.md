@@ -15,8 +15,8 @@ make build
 # Run tests
 make test
 
-# Build container images
-make docker-build
+# Build rock image
+make rock-build
 
 # Validate Helm chart
 make helm-lint
