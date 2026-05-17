@@ -4,7 +4,7 @@
 
 ### Error Handling
 
-- Wrap errors with context using `fmt.Errorf("context: %w", err)` for better traceability.
+- Use `fmt.Errorf("context: %w", err)` to wrap errors for better traceability.
 - In `cmd/fancni/main.go`, errors from the main logic are handled by `writeCNIError(err)` and result in an exit code of 1.
 - When executing external commands (e.g., `fanctl`), check for `exec.ErrNotFound` and provide actionable error messages (see `internal/fan/fanctl.go`).
 - For file operations in IPAM, errors are propagated and wrapped; corrupt entries are detected and reported.
@@ -100,8 +100,8 @@
 
 ## Common Gotchas
 
-- Ensure that the log file path (`/var/log/fancni.log`) is writable; otherwise, logs will be directed to `os.Stderr`, which may lead to missing logs in production.
-- When modifying the CNI configuration, ensure that the CIDR format is correct to avoid runtime errors.
-- Be cautious with error handling; always check for errors after function calls that can fail, especially in network and file operations.
-- The `rock-build` command requires the `rockcraft` tool to be installed and properly configured in your environment.
-- End-to-end tests may require a specific environment setup (e.g., Kubernetes nodes) to run successfully; ensure that the prerequisites are met.
+- Ensure that the log file path `/var/log/fancni.log` is writable; otherwise, logs will default to `os.Stderr`.
+- When modifying the CNI configuration, ensure that the `NetConfig` struct is updated accordingly to avoid runtime errors.
+- Be cautious with external command executions; always check for errors and handle them gracefully.
+- The `rockcraft` tool is used for packaging; ensure it is installed and configured correctly to avoid build failures.
+- E2E tests may require specific Kubernetes configurations; ensure the environment is set up correctly before running `make e2e`.

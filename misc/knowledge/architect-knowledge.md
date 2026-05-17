@@ -99,10 +99,11 @@
 
 ## Actionable Recommendations
 
-1. **Enhance IPAM:** Develop a distributed IPAM solution to support multi-node environments.
-2. **Implement Error Recovery:** Introduce rollback mechanisms for partial failures during CNI operations.
-3. **Abstract Iptables:** Create a layer to support nftables alongside iptables for future-proofing.
-4. **Improve Logging:** Implement log rotation and configurable log levels for better management.
-5. **Dynamic Configuration:** Enable dynamic config reloads to adapt to changes without restarting the plugin.
-6. **Refactor Testing:** Transition E2E tests to Go-based integration tests for better reliability and maintainability.
-7. **Expand Documentation:** Improve user-facing documentation to cover installation, configuration, and troubleshooting.
+1. **Expand IPAM:** Develop a distributed IPAM solution to support multi-node environments.
+2. **Implement nftables Support:** Abstract iptables management to support nftables.
+3. **Enhance Observability:** Introduce metrics and tracing for better monitoring.
+4. **Refactor Testing:** Transition E2E tests from shell scripts to Go-based integration tests for robustness.
+5. **Improve Helm Chart:** Add advanced templating and validation to the Helm chart.
+6. **Modularize CNI Logic:** Break down the monolithic `internal/cni` package into smaller, focused components.
+7. **Implement Error Recovery:** Add rollback mechanisms for partial failures in CNI operations.
+8. **Improve Documentation:** Expand user-facing documentation for better clarity and usability.
