@@ -100,8 +100,8 @@
 
 ## Common Gotchas
 
-- Ensure that the log file path `/var/log/fancni.log` is writable; otherwise, logs will default to `os.Stderr`.
-- When modifying the CNI configuration, ensure that the `NetConfig` struct is updated accordingly to avoid runtime errors.
-- Be cautious with external command executions; always check for errors and handle them gracefully.
-- The `rockcraft` tool is used for packaging; ensure it is installed and configured correctly to avoid build failures.
-- E2E tests may require specific Kubernetes configurations; ensure the environment is set up correctly before running `make e2e`.
+- Ensure that the log file path `/var/log/fancni.log` is writable; otherwise, logs will be lost.
+- When modifying the CNI configuration, ensure that the `NetConfig` struct is updated accordingly.
+- Be cautious with error handling in `fanctl` commands; missing executables can lead to misleading errors if not properly checked.
+- The `rock-build` command requires the `rockcraft` tool; ensure it is installed and configured correctly.
+- E2E tests can be resource-intensive; ensure sufficient resources are allocated for multi-node scenarios.

@@ -87,7 +87,7 @@
 - `internal/fan/`, `internal/ipam/`: Core logic for fan networking and IPAM.
 - `cmd/fancni/main.go`: Entrypoint, orchestrates config, IPAM, fan, plugin logic.
 
---- 
+---
 
 ## Key Implementation Details
 
