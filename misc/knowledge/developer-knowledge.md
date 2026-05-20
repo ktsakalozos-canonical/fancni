@@ -100,8 +100,7 @@
 
 ## Common Gotchas
 
-- Ensure that the log file path `/var/log/fancni.log` is writable; otherwise, logs will be lost.
-- When modifying the CNI configuration, ensure that the `NetConfig` struct is updated accordingly.
-- Be cautious with error handling in `fanctl` commands; missing executables can lead to misleading errors if not properly checked.
-- The `rock-build` command requires the `rockcraft` tool; ensure it is installed and configured correctly.
-- E2E tests can be resource-intensive; ensure sufficient resources are allocated for multi-node scenarios.
+- Ensure that the log file path `/var/log/fancni.log` is writable; otherwise, logs will be redirected to `os.Stderr`, which may not be monitored.
+- When modifying the CNI configuration, ensure that the configuration struct (`NetConfig`) is correctly populated to avoid runtime errors.
+- Be cautious with error handling in external command executions; always check for specific errors like `exec.ErrNotFound` to provide clear feedback.
+- When running end-to-end tests, ensure that the environment is set up correctly to avoid issues with multi-node scenarios and networking.
