@@ -1,4 +1,4 @@
-# Fancni Architecture Reference
+# Fancni Architecture Reference - Updated
 
 ## System Boundaries
 
@@ -99,11 +99,10 @@
 
 ## Actionable Recommendations
 
-1. **Expand IPAM:** Implement a distributed/multi-node IPAM solution to support scalability.
-2. **Error Handling Improvements:** Introduce error recovery mechanisms for CNI operations to handle partial failures gracefully.
-3. **Nftables Support:** Plan and implement support for nftables to future-proof the iptables management.
-4. **Enhance Observability:** Integrate metrics and tracing capabilities to monitor plugin performance and health.
-5. **Refactor CNI Logic:** Break down the monolithic `internal/cni` package into smaller, more manageable components.
-6. **Improve Helm Chart:** Add advanced templating and validation to the Helm chart for better deployment practices.
-7. **Automate Testing:** Transition E2E tests to Go-based integration tests for reliability and maintainability.
-8. **Documentation Update:** Enhance user-facing documentation to provide clearer guidance on usage and configuration.
+1. **Enhance IPAM**: Implement a distributed IPAM solution to support multi-node deployments.
+2. **Error Handling**: Introduce error recovery mechanisms for ADD/DEL operations to handle partial failures gracefully.
+3. **Nftables Support**: Plan and implement an abstraction layer for nftables to future-proof the iptables dependency.
+4. **Logging Improvements**: Implement log rotation and configurable log levels to manage log size and verbosity.
+5. **Dynamic Configuration**: Enable dynamic reloading of configuration to allow changes without restarting the plugin.
+6. **Testing Migration**: Transition E2E tests from shell scripts to Go-based tests for better reliability and maintainability.
+7. **Documentation Expansion**: Improve user-facing documentation, especially around configuration and deployment scenarios.

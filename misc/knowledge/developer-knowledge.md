@@ -100,7 +100,8 @@
 
 ## Common Gotchas
 
-- Ensure that the log file path `/var/log/fancni.log` is writable; otherwise, logs will be redirected to `os.Stderr`, which may not be monitored.
-- When modifying the CNI configuration, ensure that the configuration struct (`NetConfig`) is correctly populated to avoid runtime errors.
-- Be cautious with error handling in external command executions; always check for specific errors like `exec.ErrNotFound` to provide clear feedback.
-- When running end-to-end tests, ensure that the environment is set up correctly to avoid issues with multi-node scenarios and networking.
+- Ensure that the log file path `/var/log/fancni.log` is writable; otherwise, logs will go to `os.Stderr`, which may lead to missing logs in production environments.
+- When modifying the CNI configuration, ensure that the input matches the expected format to avoid parsing errors.
+- Be cautious with the `rock-build` command; it requires `rockcraft` to be installed and properly configured.
+- The `e2e` tests depend on a running Kubernetes cluster; ensure that the cluster is set up and accessible before running these tests.
+- The `Makefile` targets are case-sensitive; ensure correct casing when executing commands.
