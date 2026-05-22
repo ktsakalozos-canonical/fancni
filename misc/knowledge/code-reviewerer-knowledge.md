@@ -3,7 +3,7 @@
 ## Edge Cases Not Handled or Tested
 
 ### Fan Networking (internal/fan)
-- **IPv6 Inputs:** The `ComputeSubnet`, `ComputeGateway`, and `validateOverlay` functions reject IPv6 overlays only via `To4() == nil`. Improve error handling to provide explicit feedback for IPv6 inputs.
+- **IPv6 Inputs:** The `ComputeSubnet`, `ComputeGateway`, and `validateOverlay` functions reject IPv6 overlays via `To4() == nil`. Improve error handling to provide explicit feedback for IPv6 inputs.
 - **Overlay CIDR Validation:** Ensure that the overlay CIDR is validated to confirm it is indeed /8. Current logic only checks the first octet, which may lead to incorrect mappings.
 - **Bridge Name Collisions:** The `ComputeBridgeName` function generates bridge names based solely on the first octet of the overlay. This can lead to collisions with overlays like "240.0.0.0/8" and "240.1.0.0/8". Implement a more robust naming strategy to avoid collisions.
 - **fanctl exec error:** If `fanctl` is present but fails (e.g., due to invalid arguments or permissions), the error is surfaced but not retried or handled gracefully. Implement retry logic or better error handling.

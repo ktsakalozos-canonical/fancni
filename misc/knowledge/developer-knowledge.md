@@ -100,8 +100,8 @@
 
 ## Common Gotchas
 
-- Ensure that the log file path `/var/log/fancni.log` is writable; otherwise, logs will go to `os.Stderr`, which may lead to missing logs in production environments.
-- When modifying the CNI configuration, ensure that the input matches the expected format to avoid parsing errors.
-- Be cautious with the `rock-build` command; it requires `rockcraft` to be installed and properly configured.
-- The `e2e` tests depend on a running Kubernetes cluster; ensure that the cluster is set up and accessible before running these tests.
-- The `Makefile` targets are case-sensitive; ensure correct casing when executing commands.
+- Ensure that the log directory `/var/log/` is writable by the process running the binary to avoid logging issues.
+- When modifying CNI configurations, ensure the correct format is maintained to prevent parsing errors.
+- Be cautious with the `go.mod` file; adding indirect dependencies can lead to unexpected behaviors if not properly managed.
+- When running end-to-end tests, ensure that the environment is set up correctly, including network configurations and permissions for container access.
+- Always check for the latest Go version compatibility, as the project specifies `go 1.24.13` in `go.mod`.

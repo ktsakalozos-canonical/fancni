@@ -9,7 +9,8 @@ This document distills actionable knowledge for reviewing the `fancni` codebase,
 ### 1.1. `internal/fan/`
 - **fan.go**:
   - **Tested**: `ComputeSubnet`, `ComputeGateway`, `ComputeBridgeName`, `ComputeUnderlayArg`, error paths for invalid overlay/host IP.
-  - **Untested**: Some edge cases in `validateOverlay` (e.g., malformed CIDR, non-IPv4 overlays) are covered, but ensure all error returns are exercised.
+  - **Untested**: Edge cases in `validateOverlay` (e.g., malformed CIDR, non-IPv4 overlays) are not fully exercised.
+    - **Action**: Ensure all error returns are exercised in tests.
 - **fanctl.go**:
   - **NOT unit tested**: `EnsureBridge` is not covered by tests (due to `exec.Command` call).
     - **Action**: Add tests with `exec.Command` mocking (e.g., using `testexec` or similar) to verify error handling for:
