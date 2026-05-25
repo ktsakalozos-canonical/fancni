@@ -1,4 +1,4 @@
-# Knowledge Reference for fancni Code Review
+# Knowledge Reference for `fancni` Code Review
 
 This document distills actionable knowledge for reviewing the `fancni` codebase, focusing on test coverage gaps, security-sensitive paths, code smells, and error handling issues. It is organized by component and file.
 

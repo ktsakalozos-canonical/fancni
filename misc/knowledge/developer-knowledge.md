@@ -4,8 +4,8 @@
 
 ### Error Handling
 
-- Use `fmt.Errorf("context: %w", err)` to wrap errors for better traceability.
-- In `cmd/fancni/main.go`, errors from the main logic are handled by `writeCNIError(err)` and result in an exit code of 1.
+- Use `fmt.Errorf("context: %w", err)` for wrapping errors to enhance traceability.
+- In `cmd/fancni/main.go`, errors from the main logic are handled by `writeCNIError(err)` which results in an exit code of 1.
 - When executing external commands (e.g., `fanctl`), check for `exec.ErrNotFound` and provide actionable error messages (see `internal/fan/fanctl.go`).
 - For file operations in IPAM, errors are propagated and wrapped; corrupt entries are detected and reported.
 
@@ -100,8 +100,7 @@
 
 ## Common Gotchas
 
-- Ensure that the log directory `/var/log/` is writable by the process running the binary to avoid logging issues.
-- When modifying CNI configurations, ensure the correct format is maintained to prevent parsing errors.
-- Be cautious with the `go.mod` file; adding indirect dependencies can lead to unexpected behaviors if not properly managed.
-- When running end-to-end tests, ensure that the environment is set up correctly, including network configurations and permissions for container access.
-- Always check for the latest Go version compatibility, as the project specifies `go 1.24.13` in `go.mod`.
+- Ensure that the log file path `/var/log/fancni.log` is writable; otherwise, logs will be redirected to `os.Stderr`, which may lead to missing logs in production.
+- When modifying CNI configurations, ensure that the correct format is followed, as improper configurations can lead to runtime errors.
+- Be cautious with the `make clean` command; it removes all build artifacts, including any manually created files in `_output/`.
+- When running end-to-end tests, ensure that the environment is properly set up to mimic production conditions, as discrepancies can lead to false negatives.
