@@ -99,11 +99,11 @@
 
 ## Actionable Recommendations
 
-1. **Enhance IPAM:** Investigate distributed IPAM solutions for multi-node support.
-2. **Implement Error Recovery:** Design a strategy for handling partial failures in CNI operations.
-3. **Abstract Iptables:** Consider adding support for nftables to future-proof the plugin.
-4. **Improve Logging:** Implement log rotation and configurable log levels.
-5. **Dynamic Configuration:** Explore options for dynamic config reloads to improve operational flexibility.
+1. **Expand IPAM:** Develop a distributed IPAM solution to support multi-node scenarios.
+2. **Implement Error Recovery:** Introduce rollback mechanisms for ADD/DEL operations to handle partial failures.
+3. **Abstract Iptables:** Create an abstraction layer for nftables to future-proof the plugin.
+4. **Enhance Logging:** Implement log rotation and configurable log levels for better management.
+5. **Dynamic Configuration:** Enable support for dynamic configuration reloads and validation.
 6. **Refactor CNI Logic:** Break down the monolithic `internal/cni` package into smaller, more manageable components.
-7. **Strengthen Testing:** Transition E2E tests to Go-based integration tests for better reliability and maintainability.
-8. **Expand Documentation:** Create comprehensive user-facing documentation to facilitate onboarding and usage.
+7. **Improve Testing:** Transition E2E tests to Go-based integration tests for better reliability and maintainability.
+8. **Documentation Improvement:** Expand user-facing documentation to cover installation, configuration, and troubleshooting.
