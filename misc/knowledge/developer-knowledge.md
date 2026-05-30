@@ -100,8 +100,8 @@
 
 ## Common Gotchas
 
-- Ensure that the log file path `/var/log/fancni.log` is writable; otherwise, logs will be redirected to `os.Stderr`, which may lead to loss of log data.
-- When modifying CNI configurations, ensure that the CIDR format is correct to avoid network issues.
-- Be cautious with the `go.mod` dependencies; indirect dependencies may lead to unexpected behavior if not properly managed.
-- When running end-to-end tests, ensure that the environment is set up correctly to avoid false negatives.
-- Always check for `exec.ErrNotFound` when executing external commands to provide meaningful error messages.
+- Ensure that the log file path (`/var/log/fancni.log`) is writable; otherwise, logs will be lost.
+- When modifying configuration, ensure that `NetConfig` is correctly populated to avoid runtime errors.
+- Be cautious with error handling in `fanctl`; missing commands can lead to misleading error messages if not checked properly.
+- The `rock-build` command requires the `rockcraft` tool to be installed and configured correctly; ensure it's available in your environment.
+- When running E2E tests, ensure that the environment is set up correctly to mimic production scenarios, as they depend on multi-node configurations.
