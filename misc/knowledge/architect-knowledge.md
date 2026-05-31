@@ -99,10 +99,10 @@
 
 ## Actionable Recommendations
 
-1. **Enhance IPAM:** Investigate distributed IPAM solutions or design a multi-node capable IPAM.
-2. **Implement Error Recovery:** Develop mechanisms for handling partial failures during CNI operations.
-3. **Abstract Iptables:** Consider adding support for nftables or providing an abstraction layer for packet filtering.
-4. **Improve Logging:** Implement log rotation and adjustable log levels to enhance operational monitoring.
-5. **Dynamic Configuration:** Explore options for dynamic configuration reloads to improve operational flexibility.
-6. **Refactor Testing:** Transition E2E tests from shell scripts to Go-based tests for better reliability and maintainability.
-7. **Expand Documentation:** Create comprehensive user-facing documentation to facilitate onboarding and usage.
+1. **Expand IPAM:** Implement a distributed IPAM solution to support multi-node deployments.
+2. **Error Handling Improvements:** Introduce error recovery mechanisms for CNI operations to handle partial failures gracefully.
+3. **Support for Nftables:** Abstract iptables management to support nftables as well.
+4. **Enhance Logging:** Implement log rotation and configurable log levels for better observability.
+5. **Dynamic Configuration:** Add support for dynamic configuration reloads to improve operational flexibility.
+6. **Testing Migration:** Transition E2E tests from shell scripts to Go-based integration tests for better reliability and maintainability.
+7. **Documentation Update:** Enhance user-facing documentation to provide clearer guidance on usage and configuration.
