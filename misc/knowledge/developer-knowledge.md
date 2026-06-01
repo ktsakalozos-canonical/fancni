@@ -100,7 +100,8 @@
 
 ## Common Gotchas
 
-- Ensure that the log file path (`/var/log/fancni.log`) is writable; otherwise, logs will be redirected to `os.Stderr`.
-- Be cautious with error handling in external command execution; always check for `exec.ErrNotFound`.
-- When modifying the CNI configuration, ensure that the format matches what `config.Parse` expects to avoid runtime errors.
-- Be aware of the implications of the auto-detection of the host IP; it may lead to unexpected behavior in certain network setups.
+- Ensure that the log file path `/var/log/fancni.log` is writable; otherwise, logs will be lost.
+- Be cautious with error handling in external command executions; always check for specific errors like `exec.ErrNotFound`.
+- When modifying the CNI configuration, ensure that the `NetConfig` struct is correctly populated to avoid runtime errors.
+- Remember to run `make clean` before building if you encounter stale binaries or artifacts.
+- When working with IPAM, be aware of potential race conditions; ensure proper locking mechanisms are in place when accessing shared resources.
