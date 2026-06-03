@@ -101,7 +101,7 @@
 ## Common Gotchas
 
 - Ensure that the log file path `/var/log/fancni.log` is writable; otherwise, logs will be lost.
-- Be cautious with error handling in external command executions; always check for specific errors like `exec.ErrNotFound`.
-- When modifying the CNI configuration, ensure that the `NetConfig` struct is correctly populated to avoid runtime errors.
-- Remember to run `make clean` before building if you encounter stale binaries or artifacts.
-- When working with IPAM, be aware of potential race conditions; ensure proper locking mechanisms are in place when accessing shared resources.
+- The `rock-build` command requires the `rockcraft` tool to be installed and properly configured.
+- When modifying CNI configurations, ensure that the expected format is adhered to, as parsing errors can lead to runtime failures.
+- Be cautious with the use of global variables; they can lead to race conditions in concurrent scenarios.
+- Always run `make clean` before a fresh build to avoid issues with stale binaries.

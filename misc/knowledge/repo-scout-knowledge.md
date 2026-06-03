@@ -8,7 +8,7 @@
 - `golang.org/x/sys` `v0.10.0` (indirect)
 
 **System Dependencies:**
-- `fanctl` binary (from `ubuntu-fan` package) must be installed on host for bridge setup.
+- `fanctl` binary (from `ubuntu-fan` package) must be installed on the host for bridge setup.
 
 ---
 
