@@ -100,7 +100,8 @@
 
 ## Common Gotchas
 
-- Ensure that the log file path `/var/log/fancni.log` is writable; otherwise, logs will be redirected to `os.Stderr`, which may lead to loss of log context.
-- When modifying CNI configurations, ensure that the input adheres to the expected format to avoid runtime errors in parsing.
-- Be cautious with error handling in external command executions; always provide clear and actionable error messages to aid debugging.
-- The IPAM state files (`ipam.json`, `ipam.lock`) should be managed carefully to avoid race conditions or data corruption during concurrent accesses.
+- Ensure that the log file path (`/var/log/fancni.log`) is writable; otherwise, logging will fall back to `os.Stderr`.
+- When modifying configuration, ensure that the CIDR format is correct to avoid runtime errors.
+- Be cautious with file permissions when running tests that involve file operations, particularly in IPAM.
+- The `rock-build` command requires the `rockcraft` tool to be installed and properly configured.
+- When running end-to-end tests, ensure that the environment matches the expected setup (e.g., Kubernetes cluster state, network policies).
