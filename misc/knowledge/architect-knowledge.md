@@ -1,109 +1,33 @@
-# Fancni Architecture Reference - Updated
-
-## System Boundaries
-
-- **Fancni** is a CNI plugin implementing deterministic Fan Networking for Kubernetes pods.
-- **Scope:** Handles pod IP allocation, bridge setup, iptables rules, and CNI lifecycle (ADD/DEL/CHECK).
-- **Out-of-scope:** Does not manage node-level networking outside the fan bridge, nor orchestrate cluster-wide overlays.
-
-## Module Responsibilities
-
-### `cmd/fancni`
-- **Entrypoint:** Main binary for CNI plugin.
-- **Responsibilities:**
-  - Logging to `/var/log/fancni.log`.
-  - Reads CNI config from stdin.
-  - Detects host IP (UDP dial trick).
-  - Computes pod subnet via Fan math.
-  - Instantiates file-backed IPAM.
-  - Dispatches to internal CNI plugin handler for ADD/DEL/CHECK/VERSION.
-
-### `internal/config`
-- **Config Parsing:** Reads and validates CNI config JSON (from stdin).
-- **Responsibilities:** Converts config into typed struct (`NetConfig`).
-
-### `internal/fan`
-- **Fan Networking Math:** Pure functions for overlay/underlay mapping.
-- **Responsibilities:**
-  - Compute pod subnet, gateway, bridge name, underlay arg.
-  - Validate overlay CIDR.
-  - Bridge creation via `fanctl` (only exec in codebase).
-- **Technical Decision:** All mapping logic is deterministic and stateless.
-
-### `internal/ipam`
-- **IP Address Management:** Allocates/reclaims pod IPs.
-- **Responsibilities:**
-  - Interface for IPAM (`Allocate`, `Lookup`, `Free`).
-  - File-backed implementation (`FileIPAM`):
-    - Stores allocations in JSON file.
-    - Uses exclusive file lock for concurrency.
-    - Allocates sequential IPs in pod subnet (.2–.254).
-    - Idempotent allocation: returns existing IP if containerID already allocated.
-- **Technical Debt:** Only file-backed IPAM; no support for distributed/multi-node IPAM.
-
-### `internal/netutil`
-- **Netlink Helpers:** Utility for link existence, interface manipulation.
-- **Responsibilities:** Abstracts netlink operations (used by fan bridge setup).
-
-### `internal/iptables`
-- **Iptables Management:** Sets up required rules for pod traffic.
-- **Responsibilities:** Ensures rules for SNAT, forwarding, etc.
-- **Technical Debt:** No abstraction for nftables; assumes iptables.
-
-### `internal/cni`
-- **CNI Plugin Logic:** Implements CNI lifecycle.
-- **Responsibilities:**
-  - Handles ADD/DEL/CHECK/VERSION.
-  - Integrates config, IPAM, host IP, fan math, netutil, iptables.
-  - Outputs CNI result JSON.
-- **Technical Debt:** No error recovery for partial failures; assumes atomicity.
-
-## Dependency Graph
-
-- `cmd/fancni` → `internal/config`, `internal/fan`, `internal/ipam`, `internal/cni`
-- `internal/cni` → `internal/config`, `internal/fan`, `internal/ipam`, `internal/netutil`, `internal/iptables`
-- `internal/fan` → `internal/netutil`
-- `internal/ipam` → (none)
-- `internal/netutil` → `github.com/vishvananda/netlink`
-- `internal/iptables` → `github.com/coreos/go-iptables`
-- `internal/config` → (none)
-
-## Architectural Decisions
-
-- **Single exec:** Only `fanctl` is invoked via exec; all other networking is via Go libraries.
-- **File-based IPAM:** Chosen for simplicity and node-local operation; not cluster-aware.
-- **Stateless fan math:** Overlay/underlay mapping is pure and deterministic.
-- **Logging:** All plugin operations are logged to a file for traceability.
-- **Error Handling:** Errors are surfaced as CNI error JSON; plugin exits with code 1.
-
-## Incomplete/In-progress Work
-
-- **IPAM:** Only file-backed, no distributed or multi-node support. See TODOs for future cluster-wide IPAM.
-- **Iptables:** No support for nftables; migration path not defined.
-- **Observability:** Logging exists, but no metrics or tracing. See `misc/nightly-dreams/observability.md`.
-- **Testing:** E2E tests are being expanded (see recent commits in `tests/e2e/test-e2e.sh` and `misc/coding-team/e2e-test`). Coverage for cross-node forwarding, containerd socket, HTTP retries, and image pull issues are actively being addressed.
-- **Helm Chart:** Basic chart exists, but lacks advanced templating and validation. See `deploy/helm/fancni`.
-- **Automation:** Nightly workflows for knowledge distillation and e2e testing are being developed (`.github/workflows/nightly-knowledge.yml`, `.github/workflows/nightly-dreams.yml`).
-- **Modularity:** Internal packages are well-separated, but plugin logic in `internal/cni` is monolithic. See `misc/nightly-dreams/modularity.md` for refactoring plans.
-
-## Technical Debt
-
-- **IPAM Scalability:** File-based IPAM is not suitable for multi-node or HA scenarios.
-- **Error Recovery:** No rollback or cleanup for partial failures in ADD/DEL.
-- **Fanctl Dependency:** Requires `fanctl` binary in PATH; not vendored or containerized.
-- **Iptables-only:** No abstraction for alternative packet filters.
-- **Logging:** Log rotation and log level control not implemented.
-- **Configuration:** No support for dynamic config reloads or advanced validation.
-- **Testing:** E2E tests are shell-based and brittle; need migration to Go-based integration tests.
-- **Documentation:** User-facing docs are minimal; see `README.md` and `ARCHITECTURE.md`.
-
 ## Actionable Recommendations
 
-1. **Enhance IPAM:** Investigate and implement a distributed IPAM solution to support multi-node deployments.
-2. **Implement Error Recovery:** Design a mechanism for error recovery in CNI operations to handle partial failures gracefully.
-3. **Abstract Iptables:** Create an abstraction layer for iptables to support nftables and other packet filtering mechanisms.
-4. **Improve Logging:** Implement log rotation and configurable log levels to manage log size and verbosity.
-5. **Dynamic Configuration:** Add support for dynamic configuration reloads to allow changes without restarting the plugin.
-6. **Refactor CNI Logic:** Break down the monolithic logic in `internal/cni` into smaller, more manageable components for better maintainability.
-7. **Migrate E2E Tests:** Transition from shell-based E2E tests to Go-based integration tests for improved reliability and maintainability.
-8. **Expand Documentation:** Enhance user-facing documentation to provide clearer guidance on installation, configuration, and usage.
+### System Boundaries and Module Responsibilities
+- **Review and Define Scope**: Ensure that the project scope is clearly defined in documentation to avoid feature creep. Focus on enhancing the CNI plugin's capabilities without extending beyond its intended use case.
+  
+### Architectural Decisions
+- **Evaluate Single Exec Usage**: Consider the implications of relying solely on `fanctl` for bridge creation. Investigate whether this can be integrated into the Go codebase to reduce external dependencies.
+- **Assess File-based IPAM**: Prioritize the development of a distributed IPAM solution to support multi-node environments. Consider leveraging existing libraries or services to facilitate this.
+  
+### Dependency Graph
+- **Monitor External Dependencies**: Regularly check for updates on `github.com/coreos/go-iptables` and `github.com/vishvananda/netlink` to ensure compatibility and security.
+- **Refactor Internal Dependencies**: Investigate the potential for decoupling the `internal/cni` package to improve maintainability and testability. 
+
+### Incomplete/In-progress Work
+- **IPAM Development**: Prioritize the implementation of a distributed IPAM solution. Create a roadmap for transitioning from file-based to a more robust solution.
+- **Iptables Migration**: Define a clear migration plan for supporting nftables, including a timeline and resource allocation.
+- **Enhance Observability**: Implement metrics and tracing capabilities to improve monitoring and debugging. Review `misc/nightly-dreams/observability.md` for existing ideas and expand upon them.
+- **Expand Testing Framework**: Transition E2E tests from shell scripts to Go-based tests to improve reliability and maintainability. Focus on critical paths first, such as pod creation and deletion.
+- **Refine Helm Chart**: Enhance the existing Helm chart with advanced templating and validation features. Ensure it supports common deployment scenarios and configurations.
+
+### Technical Debt
+- **Address IPAM Scalability**: Initiate a project to design and implement a scalable IPAM solution. Engage with the community for best practices and potential contributions.
+- **Implement Error Recovery**: Develop a strategy for handling partial failures during CNI operations. Consider implementing rollback mechanisms or cleanup routines.
+- **Containerize Dependencies**: Investigate the feasibility of containerizing the `fanctl` binary to eliminate the need for it to be in the PATH.
+- **Abstract Packet Filtering**: Research and plan for the introduction of an abstraction layer that supports both iptables and nftables.
+- **Improve Logging**: Implement log rotation and configurable log levels to enhance logging capabilities. Review current logging practices and consider adopting structured logging.
+- **Dynamic Configuration Support**: Explore options for dynamic configuration reloads to allow for runtime changes without restarting the plugin.
+- **Enhance Documentation**: Allocate time for improving user-facing documentation, ensuring it covers installation, configuration, and troubleshooting. Prioritize updates to `README.md` and `ARCHITECTURE.md`.
+
+### General Recommendations
+- **Regular Code Reviews**: Establish a routine for code reviews to ensure adherence to architectural decisions and best practices.
+- **Community Engagement**: Engage with the Kubernetes community for feedback and contributions. This can help identify areas for improvement and foster collaboration.
+- **Continuous Integration**: Ensure that CI workflows are robust and cover all critical aspects of the project, including testing, linting, and deployment. Regularly review and update workflows in `.github/workflows/`.
