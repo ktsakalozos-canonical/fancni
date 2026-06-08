@@ -1,33 +1,39 @@
-## Actionable Recommendations
+## System Boundaries and Module Responsibilities
+- **CNI Plugin**: The primary responsibility of the project is to implement a Container Network Interface (CNI) plugin. The main entry point is located at `./cmd/fancni/main.go`.
+- **IP Address Management (IPAM)**: The `internal/ipam` package is responsible for managing IP address allocation. Currently, it uses a file-based approach which needs to be transitioned to a distributed solution.
+- **Networking Utilities**: The `internal/netutil` package provides helper functions for network operations.
+- **iptables Management**: The `internal/iptables` package handles interactions with iptables, which may need to migrate to nftables in the future.
+- **Configuration Management**: The `internal/config` package manages configuration settings for the CNI plugin.
 
-### System Boundaries and Module Responsibilities
-- **Review and Define Scope**: Ensure that the project scope is clearly defined in documentation to avoid feature creep. Focus on enhancing the CNI plugin's capabilities without extending beyond its intended use case.
-  
-### Architectural Decisions
-- **Evaluate Single Exec Usage**: Consider the implications of relying solely on `fanctl` for bridge creation. Investigate whether this can be integrated into the Go codebase to reduce external dependencies.
-- **Assess File-based IPAM**: Prioritize the development of a distributed IPAM solution to support multi-node environments. Consider leveraging existing libraries or services to facilitate this.
-  
-### Dependency Graph
-- **Monitor External Dependencies**: Regularly check for updates on `github.com/coreos/go-iptables` and `github.com/vishvananda/netlink` to ensure compatibility and security.
-- **Refactor Internal Dependencies**: Investigate the potential for decoupling the `internal/cni` package to improve maintainability and testability. 
+## Architectural Decisions
+- **Single Executable for Bridge Creation**: The reliance on `fanctl` for bridge creation should be evaluated for potential integration into the Go codebase to reduce external dependencies.
+- **File-based IPAM**: The current implementation of IPAM is file-based. A distributed IPAM solution is needed to support multi-node environments.
 
-### Incomplete/In-progress Work
-- **IPAM Development**: Prioritize the implementation of a distributed IPAM solution. Create a roadmap for transitioning from file-based to a more robust solution.
-- **Iptables Migration**: Define a clear migration plan for supporting nftables, including a timeline and resource allocation.
-- **Enhance Observability**: Implement metrics and tracing capabilities to improve monitoring and debugging. Review `misc/nightly-dreams/observability.md` for existing ideas and expand upon them.
-- **Expand Testing Framework**: Transition E2E tests from shell scripts to Go-based tests to improve reliability and maintainability. Focus on critical paths first, such as pod creation and deletion.
-- **Refine Helm Chart**: Enhance the existing Helm chart with advanced templating and validation features. Ensure it supports common deployment scenarios and configurations.
+## Dependency Graph
+- **External Dependencies**: The project relies on several indirect dependencies:
+  - `github.com/coreos/go-iptables`
+  - `github.com/vishvananda/netlink`
+  - `github.com/vishvananda/netns`
+  - `golang.org/x/sys`
+- **Internal Dependencies**: The `internal/cni` package should be decoupled from other internal packages to improve maintainability and testability.
 
-### Technical Debt
-- **Address IPAM Scalability**: Initiate a project to design and implement a scalable IPAM solution. Engage with the community for best practices and potential contributions.
-- **Implement Error Recovery**: Develop a strategy for handling partial failures during CNI operations. Consider implementing rollback mechanisms or cleanup routines.
-- **Containerize Dependencies**: Investigate the feasibility of containerizing the `fanctl` binary to eliminate the need for it to be in the PATH.
-- **Abstract Packet Filtering**: Research and plan for the introduction of an abstraction layer that supports both iptables and nftables.
-- **Improve Logging**: Implement log rotation and configurable log levels to enhance logging capabilities. Review current logging practices and consider adopting structured logging.
-- **Dynamic Configuration Support**: Explore options for dynamic configuration reloads to allow for runtime changes without restarting the plugin.
-- **Enhance Documentation**: Allocate time for improving user-facing documentation, ensuring it covers installation, configuration, and troubleshooting. Prioritize updates to `README.md` and `ARCHITECTURE.md`.
+## Incomplete/In-progress Work
+- **IPAM Development**: Transition from file-based IPAM to a distributed solution. Create a roadmap for this transition.
+- **Iptables Migration**: Develop a migration plan to support nftables, including timelines and resource allocation.
+- **Observability Enhancements**: Implement metrics and tracing capabilities. Review `misc/nightly-dreams/observability.md` for ideas.
+- **Testing Framework Expansion**: Move E2E tests from shell scripts to Go-based tests, focusing on critical paths first.
+- **Helm Chart Refinement**: Improve the Helm chart with advanced templating and validation features.
 
-### General Recommendations
-- **Regular Code Reviews**: Establish a routine for code reviews to ensure adherence to architectural decisions and best practices.
-- **Community Engagement**: Engage with the Kubernetes community for feedback and contributions. This can help identify areas for improvement and foster collaboration.
-- **Continuous Integration**: Ensure that CI workflows are robust and cover all critical aspects of the project, including testing, linting, and deployment. Regularly review and update workflows in `.github/workflows/`.
+## Areas of Technical Debt
+- **IPAM Scalability**: Initiate a project to design a scalable IPAM solution. Engage with the community for best practices.
+- **Error Recovery Mechanisms**: Develop strategies for handling partial failures during CNI operations.
+- **Containerization of Dependencies**: Investigate containerizing the `fanctl` binary to eliminate PATH dependencies.
+- **Packet Filtering Abstraction**: Plan for an abstraction layer that supports both iptables and nftables.
+- **Logging Improvements**: Implement log rotation and configurable log levels. Consider adopting structured logging.
+- **Dynamic Configuration Support**: Explore options for dynamic configuration reloads.
+- **Documentation Enhancements**: Improve user-facing documentation, focusing on `README.md` and `ARCHITECTURE.md`.
+
+## General Recommendations
+- **Code Reviews**: Establish a routine for code reviews to ensure adherence to architectural decisions.
+- **Community Engagement**: Engage with the Kubernetes community for feedback and contributions.
+- **Continuous Integration**: Regularly review and update CI workflows in `.github/workflows/` to ensure robustness.

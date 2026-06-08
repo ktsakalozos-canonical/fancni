@@ -8,9 +8,10 @@ This document distills actionable knowledge for reviewing the `fancni` codebase,
 
 ### 1.1. `internal/fan/`
 - **fan.go**:
-  - **Tested**: `ComputeSubnet`, `ComputeGateway`, `ComputeBridgeName`, `ComputeUnderlayArg`, error paths for invalid overlay/host IP.
-  - **Untested**: Edge cases in `validateOverlay` (e.g., malformed CIDR, non-IPv4 overlays) are not fully exercised.
-    - **Action**: Ensure all error returns are exercised in tests.
+  - **Test Coverage**: 
+    - **Tested**: `ComputeSubnet`, `ComputeGateway`, `ComputeBridgeName`, `ComputeUnderlayArg`, error paths for invalid overlay/host IP.
+    - **Untested**: Edge cases in `validateOverlay` (e.g., malformed CIDR, non-IPv4 overlays) are not fully exercised.
+      - **Action**: Ensure all error returns are exercised in tests.
 
 - **fanctl.go**:
   - **NOT unit tested**: `EnsureBridge` is not covered by tests (due to `exec.Command` call).
@@ -34,13 +35,14 @@ This document distills actionable knowledge for reviewing the `fancni` codebase,
 
 ### 1.3. `internal/cni/`
 - **plugin.go**:
-  - **Tested**: Basic plugin logic.
-  - **Untested**: Error propagation from underlying IPAM, bridge, and netlink operations.
-    - **Action**: Add tests for:
-      - IPAM errors (allocation, lookup, free).
-      - Bridge creation failures.
-      - Netlink failures (e.g., link not found, route add fails).
-      - Invalid/missing CNI environment variables.
+  - **Test Coverage**:
+    - **Tested**: Basic plugin logic.
+    - **Untested**: Error propagation from underlying IPAM, bridge, and netlink operations.
+      - **Action**: Add tests for:
+        - IPAM errors (allocation, lookup, free).
+        - Bridge creation failures.
+        - Netlink failures (e.g., link not found, route add fails).
+        - Invalid/missing CNI environment variables.
 
 ### 1.4. `cmd/fancni/main.go`
 - **NOT tested**: The CLI entrypoint is not covered by tests.
@@ -98,3 +100,12 @@ This document distills actionable knowledge for reviewing the `fancni` codebase,
 - Many error messages do not include enough context (e.g., which file, which operation).
   - **Action**: Always wrap errors with context using `%w` and descriptive messages.
 - Some error returns are not checked (e.g., in file I/O, lock acquisition).
+  - **Action**: Ensure all error returns are handled appropriately and logged.
+
+### 3.3. Code Consistency
+- Ensure consistent naming conventions across the codebase (e.g., camelCase vs. snake_case).
+- Review for consistent error handling patterns (e.g., using `fmt.Errorf` vs. `errors.New`).
+
+### 3.4. Dependency Management
+- Review `go.mod` for unused dependencies and ensure all required dependencies are properly documented.
+- Regularly update dependencies to mitigate vulnerabilities.

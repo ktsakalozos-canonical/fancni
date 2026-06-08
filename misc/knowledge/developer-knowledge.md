@@ -100,8 +100,8 @@
 
 ## Common Gotchas
 
-- Ensure that the log file path (`/var/log/fancni.log`) is writable; otherwise, logs will be redirected to `os.Stderr`, which may lead to loss of log context.
-- Be cautious with the auto-detection of the host IP; ensure that the UDP dial trick does not inadvertently send traffic.
-- When modifying configuration, ensure that the `NetConfig` struct is updated accordingly to avoid runtime errors.
-- Pay attention to the error handling patterns; wrapping errors with context is crucial for debugging.
-- When adding new features, ensure that corresponding tests are created, especially for edge cases in IPAM and CNI plugin handling.
+- Ensure that the log file path `/var/log/fancni.log` is writable; otherwise, logs will be redirected to `os.Stderr`, which may lead to loss of log context.
+- When modifying configurations, ensure that the `NetConfig` struct is updated accordingly to prevent runtime errors during CNI operations.
+- Be cautious with error handling in external command executions; always check for `exec.ErrNotFound` to provide meaningful feedback.
+- Remember to run `make clean` before rebuilding to avoid stale binaries in `_output/bin/`.
+- When adding new tests, ensure they cover edge cases and are named consistently to facilitate easy identification and execution.
