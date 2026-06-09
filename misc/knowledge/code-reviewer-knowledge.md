@@ -98,14 +98,4 @@ This document distills actionable knowledge for reviewing the `fancni` codebase,
 
 ### 3.2. Error Handling
 - Many error messages do not include enough context (e.g., which file, which operation).
-  - **Action**: Always wrap errors with context using `%w` and descriptive messages.
-- Some error returns are not checked (e.g., in file I/O, lock acquisition).
-  - **Action**: Ensure all error returns are handled appropriately and logged.
-
-### 3.3. Code Consistency
-- Ensure consistent naming conventions across the codebase (e.g., camelCase vs. snake_case).
-- Review for consistent error handling patterns (e.g., using `fmt.Errorf` vs. `errors.New`).
-
-### 3.4. Dependency Management
-- Review `go.mod` for unused dependencies and ensure all required dependencies are properly documented.
-- Regularly update dependencies to mitigate vulnerabilities.
+  - **Action**: Enhance error messages to include contextual information to aid in debugging.
