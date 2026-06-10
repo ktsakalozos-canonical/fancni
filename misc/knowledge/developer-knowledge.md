@@ -11,7 +11,7 @@
 
 ### Logging
 
-- Logging is initialized in `main.go` to write to `/var/log/fancni.log` (append mode). If the log file can't be opened, logs are redirected to `os.Stderr`.
+- Logging is initialized in `cmd/fancni/main.go` to write to `/var/log/fancni.log` (append mode). If the log file can't be opened, logs are redirected to `os.Stderr`.
 - The log format is plain text, utilizing Go's standard `log` package.
 - Log the invocation context: `CNI_COMMAND` and `CNI_CONTAINERID`.
 - Log warnings for recoverable issues (e.g., log file not available).
@@ -40,8 +40,8 @@
 ### Functions & Variables
 
 - Functions are named based on their purpose:
-  - `ComputeSubnet`, `ComputeGateway`, `ComputeBridgeName`, `ComputeUnderlayArg` in `fan.go`
-  - `EnsureBridge` in `fanctl.go`
+  - `ComputeSubnet`, `ComputeGateway`, `ComputeBridgeName`, `ComputeUnderlayArg` in `internal/fan/fan.go`
+  - `EnsureBridge` in `internal/fan/fanctl.go`
   - `Allocate`, `Lookup`, `Free` for the IPAM interface
   - `HandleAdd`, `HandleDel`, `HandleCheck`, `HandleVersion` for CNI plugin
 - Variables include:
@@ -100,7 +100,7 @@
 
 ## Common Gotchas
 
-- Ensure that the log file path is writable; otherwise, logs will go to `os.Stderr`, which may not be monitored.
-- When modifying CNI configurations, ensure that the structure of `NetConfig` remains consistent with expected input formats.
-- Be cautious with error handling in external command invocations; failing to check for `exec.ErrNotFound` can lead to silent failures.
-- When running end-to-end tests, ensure that the environment is correctly set up for multi-node scenarios to avoid false negatives.
+- Ensure that the log file path (`/var/log/fancni.log`) is writable; otherwise, logs will be redirected to `os.Stderr`, which may lead to missed logs.
+- When modifying the CNI configuration, ensure that the input format adheres to the expected structure to avoid parsing errors.
+- Be cautious with the `go.mod` file; indirect dependencies can lead to unexpected behavior if not properly managed.
+- When running end-to-end tests, ensure that the environment is set up correctly to avoid issues with network configurations and container states.

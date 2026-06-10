@@ -44,18 +44,18 @@
 
 ### GitHub Actions Workflows (`.github/workflows/`):
 
-- `nightly-dreams.yml`
-    - Runs nightly, focusing on project health, scalability, modularity, testing, and more.
+- `ci-tests.yml`
+    - Executes continuous integration tests, including unit tests and end-to-end tests.
   
 - `release-latest.yml`
     - Manages release process for the latest version of the project.
   
-- `ci-tests.yml`
-    - Executes continuous integration tests, including unit tests and end-to-end tests.
-  
 - `nightly-knowledge.yml`
     - Runs nightly, focuses on knowledge distillation and agent prompt updates.
     - Generates workflow file reports, prompt update reports, and includes prior knowledge.
+
+- `nightly-dreams.yml`
+    - Runs nightly, focusing on project health, scalability, modularity, testing, and more.
 
 ---
 
