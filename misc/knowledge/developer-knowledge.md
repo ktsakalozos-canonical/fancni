@@ -100,7 +100,7 @@
 
 ## Common Gotchas
 
-- Ensure that the log file path (`/var/log/fancni.log`) is writable; otherwise, logs will be redirected to `os.Stderr`, which may lead to missed logs.
-- When modifying the CNI configuration, ensure that the input format adheres to the expected structure to avoid parsing errors.
-- Be cautious with the `go.mod` file; indirect dependencies can lead to unexpected behavior if not properly managed.
-- When running end-to-end tests, ensure that the environment is set up correctly to avoid issues with network configurations and container states.
+- Ensure that the log file path `/var/log/fancni.log` is writable; otherwise, logs will be redirected to `os.Stderr`, which may lead to loss of log context.
+- Be cautious with error handling in external command executions; always check for `exec.ErrNotFound` to provide meaningful feedback.
+- When modifying configuration, ensure that the `NetConfig` struct is updated accordingly to avoid runtime panics due to unrecognized fields.
+- The `make e2e` command requires that the environment is set up correctly for multi-node testing; ensure that all nodes are reachable and properly configured.

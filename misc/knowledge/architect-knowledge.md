@@ -1,21 +1,22 @@
 ## System Boundaries and Module Responsibilities
-- **CNI Plugin**: The core functionality of the project is to implement a Container Network Interface (CNI) plugin. The main entry point is located at `./cmd/fancni/main.go`.
-- **IP Address Management (IPAM)**: The `internal/ipam` package manages IP address allocation. Currently, it uses a file-based approach, which should transition to a distributed solution for multi-node environments.
+- **CNI Plugin**: Core functionality is implemented as a Container Network Interface (CNI) plugin, with the main entry point at `./cmd/fancni/main.go`.
+- **IP Address Management (IPAM)**: Managed in the `internal/ipam` package using a file-based approach, which needs to transition to a distributed solution for multi-node environments.
 - **Networking Utilities**: The `internal/netutil` package provides helper functions for network operations, such as IP address manipulation and network interface management.
-- **iptables Management**: The `internal/iptables` package manages interactions with iptables, with a potential future migration to nftables.
-- **Configuration Management**: The `internal/config` package handles configuration settings for the CNI plugin, ensuring that the plugin can be customized based on deployment needs.
+- **iptables Management**: Managed in the `internal/iptables` package, with a future migration to nftables planned.
+- **Configuration Management**: Handled by the `internal/config` package, allowing customization of the CNI plugin based on deployment needs.
 
 ## Architectural Decisions
-- **Single Executable for Bridge Creation**: The reliance on `fanctl` for bridge creation should be evaluated for potential integration into the Go codebase to reduce external dependencies and improve maintainability.
-- **File-based IPAM**: The current implementation of IPAM is file-based. A distributed IPAM solution is essential for supporting multi-node environments and should be prioritized.
+- **Single Executable for Bridge Creation**: Evaluate the integration of `fanctl` into the Go codebase to reduce external dependencies and improve maintainability.
+- **File-based IPAM**: Transition to a distributed IPAM solution is essential for multi-node environments and should be prioritized.
 
 ## Dependency Graph
-- **External Dependencies**: The project relies on several indirect dependencies:
-  - `github.com/coreos/go-iptables` (for iptables management)
-  - `github.com/vishvananda/netlink` (for network link management)
-  - `github.com/vishvananda/netns` (for network namespace management)
-  - `golang.org/x/sys` (for system calls)
-- **Internal Dependencies**: The `internal/cni` package should be decoupled from other internal packages to improve maintainability and testability. Consider creating interfaces for interactions between packages.
+- **External Dependencies**:
+  - `github.com/coreos/go-iptables` (iptables management)
+  - `github.com/vishvananda/netlink` (network link management)
+  - `github.com/vishvananda/netns` (network namespace management)
+  - `golang.org/x/sys` (system calls)
+- **Internal Dependencies**: 
+  - The `internal/cni` package should be decoupled from other internal packages to improve maintainability and testability. Consider creating interfaces for interactions between packages.
 
 ## Incomplete/In-progress Work
 - **IPAM Development**: Transition from file-based IPAM to a distributed solution. Create a roadmap for this transition, including milestones and resource allocation.
@@ -28,7 +29,7 @@
 - **IPAM Scalability**: Initiate a project to design a scalable IPAM solution. Engage with the community for best practices and potential collaboration.
 - **Error Recovery Mechanisms**: Develop strategies for handling partial failures during CNI operations. Implement retry logic and fallback mechanisms.
 - **Containerization of Dependencies**: Investigate containerizing the `fanctl` binary to eliminate PATH dependencies and simplify deployment.
-- **Packet Filtering Abstraction**: Plan for an abstraction layer that supports both iptables and nftables to future-proof the networking capabilities.
+- **Packet Filtering Abstraction**: Plan for an abstraction layer that supports both iptables and nftables to future-proof networking capabilities.
 - **Logging Improvements**: Implement log rotation and configurable log levels. Consider adopting structured logging for better analysis and monitoring.
 - **Dynamic Configuration Support**: Explore options for dynamic configuration reloads to minimize downtime during configuration changes.
 - **Documentation Enhancements**: Improve user-facing documentation, focusing on `README.md` and `ARCHITECTURE.md`, to provide clear guidance for users and developers.
