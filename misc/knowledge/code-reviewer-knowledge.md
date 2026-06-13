@@ -98,4 +98,16 @@ This document distills actionable knowledge for reviewing the `fancni` codebase,
 
 ### 3.2. Error Handling
 - Many error messages do not include enough context (e.g., which file, which operation).
-  - **Action**: Enhance error messages to include more context for easier debugging.
+  - **Action**: Enhance error messages to include relevant context to aid debugging.
+
+### 3.3. Code Consistency
+- **Naming Conventions**: Ensure consistent naming conventions across files and functions (e.g., camelCase vs snake_case).
+  - **Action**: Review and standardize naming conventions throughout the codebase.
+
+### 3.4. Unused Imports
+- Check for and remove any unused imports in Go files to keep the code clean and maintainable.
+  - **Action**: Run `goimports` or `golint` to identify and clean up unused imports.
+
+### 3.5. Documentation
+- Ensure all public functions and methods are well-documented.
+  - **Action**: Add comments explaining the purpose and usage of exported functions, especially in `internal` packages.
