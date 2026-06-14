@@ -1,8 +1,8 @@
 ## System Boundaries and Module Responsibilities
 - **CNI Plugin**: Core functionality is implemented as a Container Network Interface (CNI) plugin, with the main entry point at `./cmd/fancni/main.go`.
-- **IP Address Management (IPAM)**: Managed in the `internal/ipam` package using a file-based approach, which needs to transition to a distributed solution for multi-node environments.
+- **IP Address Management (IPAM)**: Managed in the `internal/ipam` package using a file-based approach. Transition to a distributed solution for multi-node environments is necessary.
 - **Networking Utilities**: The `internal/netutil` package provides helper functions for network operations, such as IP address manipulation and network interface management.
-- **iptables Management**: Managed in the `internal/iptables` package, with a future migration to nftables planned.
+- **iptables Management**: Managed in the `internal/iptables` package, with a planned migration to nftables.
 - **Configuration Management**: Handled by the `internal/config` package, allowing customization of the CNI plugin based on deployment needs.
 
 ## Architectural Decisions
