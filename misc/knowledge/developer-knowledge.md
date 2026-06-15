@@ -100,7 +100,7 @@
 
 ## Common Gotchas
 
-- Ensure that the log file path `/var/log/fancni.log` is writable by the process to avoid silent failures.
-- When modifying configuration, ensure that the `NetConfig` struct is updated accordingly to avoid runtime errors.
-- Be cautious with error handling in external command executions; always check for `exec.ErrNotFound` to prevent misleading error messages.
-- When running E2E tests, ensure that the environment is correctly set up to avoid false negatives.
+- Ensure that the log file path (`/var/log/fancni.log`) is writable; otherwise, logs will be lost.
+- When modifying configuration, ensure that the `NetConfig` struct is updated accordingly to reflect changes in the CNI configuration.
+- Be cautious of race conditions in tests, especially when dealing with shared resources in IPAM.
+- Always validate input for functions that interact with external systems to avoid unexpected crashes or behavior.
