@@ -1,29 +1,29 @@
 ## System Boundaries and Module Responsibilities
-- **CNI Plugin**: Core functionality is implemented as a Container Network Interface (CNI) plugin, with the main entry point at `./cmd/fancni/main.go`.
-- **IP Address Management (IPAM)**: Managed in the `internal/ipam` package using a file-based approach. Transition to a distributed solution for multi-node environments is necessary.
-- **Networking Utilities**: The `internal/netutil` package provides helper functions for network operations, such as IP address manipulation and network interface management.
+- **CNI Plugin**: The core functionality is encapsulated within the CNI plugin, with the main entry point defined in `./cmd/fancni/main.go`.
+- **IP Address Management (IPAM)**: Implemented in the `internal/ipam` package, currently using a file-based approach. Transitioning to a distributed solution for multi-node environments is critical.
+- **Networking Utilities**: The `internal/netutil` package provides essential helper functions for network operations, such as IP address manipulation and network interface management.
 - **iptables Management**: Managed in the `internal/iptables` package, with a planned migration to nftables.
 - **Configuration Management**: Handled by the `internal/config` package, allowing customization of the CNI plugin based on deployment needs.
 
 ## Architectural Decisions
-- **Single Executable for Bridge Creation**: Evaluate the integration of `fanctl` into the Go codebase to reduce external dependencies and improve maintainability.
-- **File-based IPAM**: Transition to a distributed IPAM solution is essential for multi-node environments and should be prioritized.
+- **Single Executable for Bridge Creation**: Consider integrating `fanctl` into the Go codebase to reduce external dependencies and enhance maintainability.
+- **File-based IPAM**: Prioritize transitioning to a distributed IPAM solution for improved scalability in multi-node environments.
 
 ## Dependency Graph
 - **External Dependencies**:
-  - `github.com/coreos/go-iptables` (iptables management)
-  - `github.com/vishvananda/netlink` (network link management)
-  - `github.com/vishvananda/netns` (network namespace management)
-  - `golang.org/x/sys` (system calls)
+  - `github.com/coreos/go-iptables` (for iptables management)
+  - `github.com/vishvananda/netlink` (for network link management)
+  - `github.com/vishvananda/netns` (for network namespace management)
+  - `golang.org/x/sys` (for system calls)
 - **Internal Dependencies**: 
-  - The `internal/cni` package should be decoupled from other internal packages to improve maintainability and testability. Consider creating interfaces for interactions between packages.
+  - The `internal/cni` package should be decoupled from other internal packages to enhance maintainability and testability. Consider defining interfaces for interactions between packages.
 
 ## Incomplete/In-progress Work
-- **IPAM Development**: Transition from file-based IPAM to a distributed solution. Create a roadmap for this transition, including milestones and resource allocation.
-- **Iptables Migration**: Develop a migration plan to support nftables, including timelines and resource allocation. Evaluate the impact on existing functionality.
+- **IPAM Development**: Transition from file-based IPAM to a distributed solution. Create a roadmap with milestones and resource allocation.
+- **Iptables Migration**: Develop a migration plan to support nftables, including timelines and resource allocation. Assess the impact on existing functionality.
 - **Observability Enhancements**: Implement metrics and tracing capabilities. Review `misc/nightly-dreams/observability.md` for ideas and prioritize implementation.
-- **Testing Framework Expansion**: Move E2E tests from shell scripts (`tests/e2e/test-e2e.sh`) to Go-based tests, focusing on critical paths first to enhance reliability and maintainability.
-- **Helm Chart Refinement**: Improve the Helm chart located in `deploy/helm/fancni/` with advanced templating and validation features to ensure proper deployment configurations.
+- **Testing Framework Expansion**: Transition E2E tests from shell scripts (`tests/e2e/test-e2e.sh`) to Go-based tests, focusing on critical paths first to improve reliability and maintainability.
+- **Helm Chart Refinement**: Enhance the Helm chart in `deploy/helm/fancni/` with advanced templating and validation features to ensure proper deployment configurations.
 
 ## Areas of Technical Debt
 - **IPAM Scalability**: Initiate a project to design a scalable IPAM solution. Engage with the community for best practices and potential collaboration.

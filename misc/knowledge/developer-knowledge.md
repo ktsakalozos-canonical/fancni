@@ -5,7 +5,7 @@
 ### Error Handling
 
 - Use `fmt.Errorf("context: %w", err)` for wrapping errors to enhance traceability.
-- In `cmd/fancni/main.go`, errors from the main logic are handled by `writeCNIError(err)`, which results in an exit code of 1.
+- In `cmd/fancni/main.go`, errors from the main logic are handled by `writeCNIError(err)`, resulting in an exit code of 1.
 - When executing external commands (e.g., `fanctl`), check for `exec.ErrNotFound` and provide actionable error messages (see `internal/fan/fanctl.go`).
 - For file operations in IPAM, errors are propagated and wrapped; corrupt entries are detected and reported.
 
@@ -100,7 +100,7 @@
 
 ## Common Gotchas
 
-- Ensure that the log file path (`/var/log/fancni.log`) is writable; otherwise, logs will be lost.
-- When modifying configuration, ensure that the `NetConfig` struct is updated accordingly to reflect changes in the CNI configuration.
-- Be cautious of race conditions in tests, especially when dealing with shared resources in IPAM.
-- Always validate input for functions that interact with external systems to avoid unexpected crashes or behavior.
+- Ensure that the log file path `/var/log/fancni.log` is writable; otherwise, logs will be lost.
+- When modifying CNI configurations, ensure that the `NetConfig` struct is updated accordingly to avoid runtime errors.
+- Be cautious with error handling in external command executions; always check for `exec.ErrNotFound`.
+- When running end-to-end tests, ensure the environment is set up correctly to avoid false negatives.
