@@ -1,4 +1,4 @@
-# Knowledge Reference for `fancni` Code Review
+## Knowledge Reference for `fancni` Code Review
 
 This document distills actionable knowledge for reviewing the `fancni` codebase, focusing on test coverage gaps, security-sensitive paths, code smells, and error handling issues. It is organized by component and file.
 
@@ -98,8 +98,4 @@ This document distills actionable knowledge for reviewing the `fancni` codebase,
 
 ### 3.2. Error Handling
 - Many error messages do not include enough context (e.g., which file, which operation).
-  - **Action**: Enhance error messages to include context for easier debugging and tracing.
-
-### 3.3. Code Consistency
-- Ensure consistent naming conventions across files and functions.
-  - **Action**: Review naming conventions and refactor where necessary for clarity and consistency.
+  - **Action**: Enhance error messages to include contextual information for easier debugging.
