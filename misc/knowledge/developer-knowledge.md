@@ -100,7 +100,7 @@
 
 ## Common Gotchas
 
-- Ensure that the log directory `/var/log/` exists and is writable; otherwise, logging will fail silently to `os.Stderr`.
-- When modifying CNI configurations, ensure that the `NetConfig` struct is properly populated to avoid runtime errors.
-- Be cautious with the `go.mod` file; indirect dependencies may change, affecting builds if not properly managed.
-- When running end-to-end tests, ensure that the environment is correctly set up to mimic production scenarios, as discrepancies can lead to false negatives.
+- Ensure that the log file path `/var/log/fancni.log` is writable by the process running the binary to avoid silent failures.
+- When modifying CNI configurations, ensure that the `NetConfig` struct is updated accordingly to prevent runtime errors.
+- Be cautious with the `go.mod` file; ensure dependencies are updated and tidy to avoid build issues.
+- When running end-to-end tests, ensure that the environment is set up correctly, as tests may depend on specific network configurations and multi-node setups.
