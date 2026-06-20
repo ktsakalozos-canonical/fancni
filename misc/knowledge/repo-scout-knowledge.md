@@ -35,8 +35,8 @@
 
 ### Scripts
 
-- `deploy/scripts/install-cni.sh`: Installs the CNI plugin.
 - `deploy/scripts/init-node.sh`: Initializes node for `fancni`.
+- `deploy/scripts/install-cni.sh`: Installs the CNI plugin.
 
 ---
 

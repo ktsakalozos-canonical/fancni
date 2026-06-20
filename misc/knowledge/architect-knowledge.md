@@ -1,13 +1,14 @@
 ## System Boundaries and Module Responsibilities
-- **CNI Plugin**: The core functionality is encapsulated within the CNI plugin, with the main entry point defined in `./cmd/fancni/main.go`.
-- **IP Address Management (IPAM)**: Implemented in the `internal/ipam` package, currently using a file-based approach. Transitioning to a distributed solution for multi-node environments is critical.
-- **Networking Utilities**: The `internal/netutil` package provides essential helper functions for network operations, such as IP address manipulation and network interface management.
-- **iptables Management**: Managed in the `internal/iptables` package, with a planned migration to nftables.
-- **Configuration Management**: Handled by the `internal/config` package, allowing customization of the CNI plugin based on deployment needs.
+- **CNI Plugin**: Core functionality encapsulated in `./cmd/fancni/main.go`. Responsible for network interface management and integration with Kubernetes.
+- **IP Address Management (IPAM)**: Implemented in `internal/ipam`, currently using a file-based approach. Transitioning to a distributed solution is critical for multi-node environments.
+- **Networking Utilities**: `internal/netutil` provides essential helper functions for network operations, including IP address manipulation and network interface management.
+- **iptables Management**: Managed in `internal/iptables`, with plans to migrate to nftables for enhanced functionality.
+- **Configuration Management**: Handled by `internal/config`, allowing customization of the CNI plugin based on deployment needs.
 
 ## Architectural Decisions
 - **Single Executable for Bridge Creation**: Consider integrating `fanctl` into the Go codebase to reduce external dependencies and enhance maintainability.
 - **File-based IPAM**: Prioritize transitioning to a distributed IPAM solution for improved scalability in multi-node environments.
+- **Helm for Deployment**: Utilize Helm charts located in `deploy/helm/fancni/` for managing configurations and deployments.
 
 ## Dependency Graph
 - **External Dependencies**:
@@ -15,8 +16,9 @@
   - `github.com/vishvananda/netlink` (for network link management)
   - `github.com/vishvananda/netns` (for network namespace management)
   - `golang.org/x/sys` (for system calls)
-- **Internal Dependencies**: 
-  - The `internal/cni` package should be decoupled from other internal packages to enhance maintainability and testability. Consider defining interfaces for interactions between packages.
+- **Internal Dependencies**:
+  - `internal/cni` should be decoupled from other internal packages to enhance maintainability and testability. Define interfaces for interactions between packages.
+  - `internal/ipam` is tightly coupled with `internal/netutil` for network operations.
 
 ## Incomplete/In-progress Work
 - **IPAM Development**: Transition from file-based IPAM to a distributed solution. Create a roadmap with milestones and resource allocation.

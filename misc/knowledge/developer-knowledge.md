@@ -100,7 +100,7 @@
 
 ## Common Gotchas
 
-- Ensure that the log file path `/var/log/fancni.log` is writable by the process running the binary to avoid silent failures.
-- When modifying CNI configurations, ensure that the `NetConfig` struct is updated accordingly to prevent runtime errors.
-- Be cautious with the `go.mod` file; ensure dependencies are updated and tidy to avoid build issues.
-- When running end-to-end tests, ensure that the environment is set up correctly, as tests may depend on specific network configurations and multi-node setups.
+- Ensure that the log file path (`/var/log/fancni.log`) is writable; otherwise, logs will be redirected to `os.Stderr`, which can lead to missing logs in production.
+- When modifying the CNI configuration, ensure that the `NetConfig` struct is updated accordingly to avoid runtime errors.
+- Be cautious with error handling in external command execution; always check for `exec.ErrNotFound` to provide meaningful feedback.
+- The IPAM state files (`ipam.json`, `ipam.lock`) should be managed carefully to prevent race conditions in concurrent environments.
