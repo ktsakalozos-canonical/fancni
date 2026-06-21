@@ -24,19 +24,15 @@
 - `helm-lint`: Lint Helm chart.
 - `e2e`: Run end-to-end tests via `tests/e2e/test-e2e.sh`.
 
-### Dockerfiles
+### Scripts
 
-- **Removed Docker references**: All Docker-related files have been replaced with Rockcraft configurations.
+- `deploy/scripts/init-node.sh`: Initializes node for `fancni`.
+- `deploy/scripts/install-cni.sh`: Installs the CNI plugin.
 
 ### Helm Chart
 
 - Located at `deploy/helm/fancni/`
     - `Chart.yaml`, `values.yaml`, and templates for service account, configmap, daemonset.
-
-### Scripts
-
-- `deploy/scripts/init-node.sh`: Initializes node for `fancni`.
-- `deploy/scripts/install-cni.sh`: Installs the CNI plugin.
 
 ---
 

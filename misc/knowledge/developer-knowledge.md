@@ -100,7 +100,8 @@
 
 ## Common Gotchas
 
-- Ensure that the log file path (`/var/log/fancni.log`) is writable; otherwise, logs will be redirected to `os.Stderr`, which can lead to missing logs in production.
-- When modifying the CNI configuration, ensure that the `NetConfig` struct is updated accordingly to avoid runtime errors.
-- Be cautious with error handling in external command execution; always check for `exec.ErrNotFound` to provide meaningful feedback.
-- The IPAM state files (`ipam.json`, `ipam.lock`) should be managed carefully to prevent race conditions in concurrent environments.
+- Ensure that the log file directory exists and has the correct permissions; otherwise, logging will fail silently.
+- When modifying configuration files, ensure they conform to the expected structure to avoid runtime errors.
+- Be cautious with concurrent access to IPAM state files; use appropriate locking mechanisms to prevent data corruption.
+- When running E2E tests, ensure that the necessary network configurations and permissions are in place to avoid failures.
+- The `rock-build` command requires the Rockcraft tool to be installed and configured properly; ensure it is in your PATH.
