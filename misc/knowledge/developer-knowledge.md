@@ -100,8 +100,7 @@
 
 ## Common Gotchas
 
-- Ensure that the log file directory exists and has the correct permissions; otherwise, logging will fail silently.
-- When modifying configuration files, ensure they conform to the expected structure to avoid runtime errors.
-- Be cautious with concurrent access to IPAM state files; use appropriate locking mechanisms to prevent data corruption.
-- When running E2E tests, ensure that the necessary network configurations and permissions are in place to avoid failures.
-- The `rock-build` command requires the Rockcraft tool to be installed and configured properly; ensure it is in your PATH.
+- Ensure that the log file path `/var/log/fancni.log` is writable; otherwise, logs will be lost to `os.Stderr`.
+- When modifying CNI configurations, ensure that the input format matches the expected structure in `NetConfig`.
+- Be cautious with error handling in external command executions; always check for `exec.ErrNotFound` to avoid silent failures.
+- When running E2E tests, ensure that the environment is properly set up to mimic production scenarios for accurate results.
