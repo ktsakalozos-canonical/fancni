@@ -101,6 +101,6 @@
 ## Common Gotchas
 
 - Ensure that the log file path `/var/log/fancni.log` is writable; otherwise, logs will be redirected to `os.Stderr`, which may lead to loss of log context.
-- When modifying configuration, ensure that the `NetConfig` struct is updated accordingly to avoid parsing errors.
+- When modifying the CNI configuration, ensure that the `NetConfig` struct is updated accordingly to avoid runtime errors.
 - Be cautious with error handling in external command executions; always check for `exec.ErrNotFound` to provide meaningful feedback.
-- When running end-to-end tests, ensure the environment is correctly set up for multi-node scenarios to avoid false negatives.
+- The IPAM state files (`ipam.json` and `ipam.lock`) should be managed carefully to prevent race conditions or data corruption.
