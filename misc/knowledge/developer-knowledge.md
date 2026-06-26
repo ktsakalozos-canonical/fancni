@@ -100,7 +100,7 @@
 
 ## Common Gotchas
 
-- Ensure that the log file path `/var/log/fancni.log` is writable; otherwise, logs will be redirected to `os.Stderr`, which may lead to loss of log context.
-- When modifying the CNI configuration, ensure that the `NetConfig` struct is updated accordingly to avoid runtime errors.
-- Be cautious with error handling in external command executions; always check for `exec.ErrNotFound` to provide meaningful feedback.
-- The IPAM state files (`ipam.json` and `ipam.lock`) should be managed carefully to prevent race conditions or data corruption.
+- Ensure that the log file path `/var/log/fancni.log` is writable; otherwise, logs will be redirected to `os.Stderr`, which can lead to loss of log context.
+- When modifying CNI configurations, ensure that the `NetConfig` struct is updated accordingly to avoid runtime errors.
+- Be cautious with the `exec.ErrNotFound` check; it should be handled properly to avoid misleading error messages.
+- The `make e2e` command relies on the correct setup of the environment and may fail if dependencies are not met or if the network configuration is incorrect.
