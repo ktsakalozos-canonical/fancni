@@ -100,7 +100,7 @@
 
 ## Common Gotchas
 
-- Ensure that the log file path `/var/log/fancni.log` is writable; otherwise, logs will be redirected to `os.Stderr`, which can lead to loss of log context.
+- Ensure that the log file path is writable; otherwise, logs will default to `os.Stderr`, which may lead to loss of log context.
 - When modifying CNI configurations, ensure that the `NetConfig` struct is updated accordingly to avoid runtime errors.
-- Be cautious with the `exec.ErrNotFound` check; it should be handled properly to avoid misleading error messages.
-- The `make e2e` command relies on the correct setup of the environment and may fail if dependencies are not met or if the network configuration is incorrect.
+- Be cautious with error handling in external command execution; failing to check for `exec.ErrNotFound` can lead to silent failures.
+- The `make e2e` command requires a properly configured environment; ensure all dependencies are met before running end-to-end tests.
