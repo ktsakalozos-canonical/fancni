@@ -100,7 +100,8 @@
 
 ## Common Gotchas
 
-- Ensure that the log file path is writable; otherwise, logs will default to `os.Stderr`, which may lead to loss of log context.
-- When modifying CNI configurations, ensure that the `NetConfig` struct is updated accordingly to avoid runtime errors.
-- Be cautious with error handling in external command execution; failing to check for `exec.ErrNotFound` can lead to silent failures.
-- The `make e2e` command requires a properly configured environment; ensure all dependencies are met before running end-to-end tests.
+- Ensure that the log file path `/var/log/fancni.log` is writable; otherwise, logs will be redirected to `os.Stderr`.
+- When adding new CNI commands, ensure they are properly logged and handled in `cmd/fancni/main.go`.
+- Be cautious with error handling in IPAM; ensure that all potential errors are wrapped and logged for easier debugging.
+- When modifying Helm charts, always run `make helm-lint` to catch potential issues before deployment.
+- The E2E tests rely on the correct setup of the environment; ensure that all dependencies are met before running `make e2e`.
