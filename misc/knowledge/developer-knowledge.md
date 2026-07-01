@@ -100,7 +100,7 @@
 
 ## Common Gotchas
 
-- Ensure that the log file path (`/var/log/fancni.log`) is writable by the process to avoid silent failures.
-- When modifying CNI configurations, ensure that the `NetConfig` struct is updated accordingly to avoid runtime errors.
-- Be cautious of the `exec.ErrNotFound` error when dealing with external commands; always provide meaningful error messages to aid debugging.
-- Validate IP addresses and CIDR notations rigorously to prevent runtime panics or incorrect network configurations.
+- Ensure that the log file path (`/var/log/fancni.log`) is writable; otherwise, logs will be redirected to `os.Stderr`, which may not be monitored.
+- When modifying the CNI configuration, ensure that the `NetConfig` struct is correctly populated to avoid runtime errors.
+- Be cautious with error handling in external command execution to prevent silent failures; always log the error context.
+- The `make e2e` command relies on the `tests/e2e/test-e2e.sh` script, which requires a properly configured environment for multi-node testing.
