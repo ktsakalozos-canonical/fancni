@@ -100,7 +100,8 @@
 
 ## Common Gotchas
 
-- Ensure that the log file path (`/var/log/fancni.log`) is writable; otherwise, logs will be redirected to `os.Stderr`, which may not be monitored.
-- When modifying the CNI configuration, ensure that the `NetConfig` struct is correctly populated to avoid runtime errors.
-- Be cautious with error handling in external command execution to prevent silent failures; always log the error context.
-- The `make e2e` command relies on the `tests/e2e/test-e2e.sh` script, which requires a properly configured environment for multi-node testing.
+- Ensure that the log file path (`/var/log/fancni.log`) is writable; otherwise, logs will be lost.
+- When modifying the CNI configuration, ensure that the expected fields are present to avoid runtime errors.
+- Be cautious with error handling in external command execution; always check for `exec.ErrNotFound` to provide meaningful feedback.
+- The IPAM state files (`ipam.json`, `ipam.lock`) should not be manually edited, as this can lead to corruption.
+- Ensure that the environment is set up correctly for end-to-end tests, as they depend on multi-node networking scenarios.
