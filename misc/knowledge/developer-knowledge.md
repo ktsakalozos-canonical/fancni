@@ -100,8 +100,7 @@
 
 ## Common Gotchas
 
-- Ensure that the log file path (`/var/log/fancni.log`) is writable; otherwise, logs will be lost.
-- When modifying the CNI configuration, ensure that the expected fields are present to avoid runtime errors.
-- Be cautious with error handling in external command execution; always check for `exec.ErrNotFound` to provide meaningful feedback.
-- The IPAM state files (`ipam.json`, `ipam.lock`) should not be manually edited, as this can lead to corruption.
-- Ensure that the environment is set up correctly for end-to-end tests, as they depend on multi-node networking scenarios.
+- Ensure that the log file path (`/var/log/fancni.log`) is writable by the process; otherwise, logs will be redirected to `os.Stderr`, which may lead to missing logs in production.
+- When modifying the CNI configuration, ensure that the changes are compatible with existing network setups to avoid runtime errors.
+- Be cautious with error handling in external command executions; failing to check for `exec.ErrNotFound` can lead to silent failures.
+- When running end-to-end tests, ensure that the environment is properly set up to mimic production scenarios, as discrepancies can lead to misleading test results.
