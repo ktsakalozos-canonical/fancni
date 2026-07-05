@@ -1,14 +1,16 @@
 ## System Boundaries and Module Responsibilities
 - **CNI Plugin**: Located in `./cmd/fancni/main.go`, responsible for managing network interfaces and integrating with Kubernetes.
-- **IP Address Management (IPAM)**: Found in `internal/ipam`, currently using a file-based approach. Transitioning to a distributed solution is essential for scalability in multi-node environments.
+- **IP Address Management (IPAM)**: Found in `./internal/ipam`, currently using a file-based approach. Transitioning to a distributed solution is essential for scalability in multi-node environments.
 - **Networking Utilities**: The `internal/netutil` package provides essential helper functions for network operations, such as IP address manipulation and network interface management.
 - **iptables Management**: Handled in `internal/iptables`, with plans to migrate to nftables for improved functionality and performance.
 - **Configuration Management**: Managed by `internal/config`, allowing customizable settings for the CNI plugin based on deployment requirements.
+- **Testing**: E2E tests are located in `tests/e2e/test-e2e.sh` and need to be transitioned to Go-based tests for better maintainability.
 
 ## Architectural Decisions
 - **Single Executable for Bridge Creation**: Consider integrating `fanctl` into the Go codebase to reduce external dependencies and enhance maintainability.
 - **File-based IPAM**: Prioritize transitioning to a distributed IPAM solution for improved scalability in multi-node environments.
 - **Helm for Deployment**: Utilize Helm charts located in `deploy/helm/fancni/` for managing configurations and deployments.
+- **Testing Framework**: The current E2E testing framework relies on shell scripts, which should be replaced with Go-based tests to improve reliability.
 
 ## Dependency Graph
 - **External Dependencies**:
@@ -16,6 +18,7 @@
   - `github.com/vishvananda/netlink` (for network link management)
   - `github.com/vishvananda/netns` (for network namespace management)
   - `golang.org/x/sys` (for system calls)
+  
 - **Internal Dependencies**:
   - `internal/cni` should be decoupled from other internal packages to enhance maintainability and testability. Define interfaces for interactions between packages.
   - `internal/ipam` is tightly coupled with `internal/netutil` for network operations.

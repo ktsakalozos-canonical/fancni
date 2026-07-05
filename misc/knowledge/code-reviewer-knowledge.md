@@ -98,16 +98,4 @@ This document distills actionable knowledge for reviewing the `fancni` codebase,
 
 ### 3.2. Error Handling
 - Many error messages do not include enough context (e.g., which file, which operation).
-  - **Action**: Enhance error messages to include contextual information for easier debugging.
-
-### 3.3. Consistency in Function Naming
-- Ensure consistent naming conventions across functions in different files (e.g., camelCase vs snake_case).
-  - **Action**: Review and standardize function names for clarity and consistency.
-
-### 3.4. Magic Numbers and Strings
-- Avoid using magic numbers or strings directly in the code.
-  - **Action**: Define constants for any repeated values to improve readability and maintainability.
-
-### 3.5. Documentation
-- Ensure all public functions and methods are well-documented.
-  - **Action**: Add comments to explain the purpose and usage of public APIs and complex logic.
+  - **Action**: Improve error messages to include contextual information, making it easier to diagnose issues.
