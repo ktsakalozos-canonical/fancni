@@ -97,10 +97,10 @@
   ```sh
   make helm-lint
   ```
-
+  
 ## Common Gotchas
 
-- Ensure that the log file path `/var/log/fancni.log` is writable; otherwise, logs will be redirected to `os.Stderr`, which may lead to loss of log context.
-- When modifying CNI configurations, ensure that `stdin` is correctly parsed to avoid runtime errors.
-- Be cautious with error handling in external command executions; always check for `exec.ErrNotFound` to provide clear feedback.
-- When running tests, ensure that the environment is clean to avoid flaky tests due to residual state. Use `make clean` before running tests if necessary.
+- Ensure that the log file path (`/var/log/fancni.log`) is writable; otherwise, logs will go to `os.Stderr`, which may lead to missing logs in production.
+- When modifying the CNI configuration, ensure that the `NetConfig` struct is updated accordingly to prevent runtime errors.
+- Be cautious with error handling; always wrap errors to maintain context, especially when propagating them up the call stack.
+- The `make e2e` command relies on the correct setup of the environment; ensure that all dependencies are properly installed and configured before running end-to-end tests.

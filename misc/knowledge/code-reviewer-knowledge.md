@@ -98,4 +98,4 @@ This document distills actionable knowledge for reviewing the `fancni` codebase,
 
 ### 3.2. Error Handling
 - Many error messages do not include enough context (e.g., which file, which operation).
-  - **Action**: Improve error messages to include contextual information, making it easier to diagnose issues.
+  - **Action**: Enhance error messages to include contextual information for easier debugging and tracing.
