@@ -97,10 +97,11 @@
   ```sh
   make helm-lint
   ```
-  
+
 ## Common Gotchas
 
-- Ensure that the log file path (`/var/log/fancni.log`) is writable; otherwise, logs will go to `os.Stderr`, which may lead to missing logs in production.
-- When modifying the CNI configuration, ensure that the `NetConfig` struct is updated accordingly to prevent runtime errors.
-- Be cautious with error handling; always wrap errors to maintain context, especially when propagating them up the call stack.
-- The `make e2e` command relies on the correct setup of the environment; ensure that all dependencies are properly installed and configured before running end-to-end tests.
+- Ensure that the log file path `/var/log/fancni.log` is writable; otherwise, logs will be redirected to `os.Stderr`.
+- When modifying CNI configurations, ensure that the expected format is adhered to; malformed configurations can lead to runtime errors.
+- Be cautious with the `go test` command; using `-count=1` ensures tests run fresh, but it may mask issues related to state persistence across tests.
+- The `rock-build` command requires `rockcraft` to be installed and configured properly; ensure the environment is set up before running this command.
+- Pay attention to the dependencies in `go.mod`; indirect dependencies can affect builds if they are not properly managed.
