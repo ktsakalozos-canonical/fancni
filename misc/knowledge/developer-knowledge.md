@@ -100,8 +100,7 @@
 
 ## Common Gotchas
 
-- Ensure that the log file path `/var/log/fancni.log` is writable; otherwise, logs will be redirected to `os.Stderr`.
-- When modifying CNI configurations, ensure that the expected format is adhered to; malformed configurations can lead to runtime errors.
-- Be cautious with the `go test` command; using `-count=1` ensures tests run fresh, but it may mask issues related to state persistence across tests.
-- The `rock-build` command requires `rockcraft` to be installed and configured properly; ensure the environment is set up before running this command.
-- Pay attention to the dependencies in `go.mod`; indirect dependencies can affect builds if they are not properly managed.
+- Ensure that the log file path (`/var/log/fancni.log`) is writable; otherwise, logs will be lost.
+- When modifying the configuration, ensure that the input adheres to the expected format to avoid parsing errors.
+- Be cautious with the `go.mod` file; adding indirect dependencies may lead to unexpected behavior if not properly managed.
+- The `e2e` tests may require specific network configurations to run successfully; ensure the environment is set up correctly before execution.

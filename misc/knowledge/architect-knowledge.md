@@ -1,9 +1,9 @@
 ## System Boundaries and Module Responsibilities
-- **CNI Plugin**: Located in `./cmd/fancni/main.go`, responsible for managing network interfaces and integrating with Kubernetes.
-- **IP Address Management (IPAM)**: Found in `./internal/ipam`, currently using a file-based approach. Transitioning to a distributed solution is essential for scalability in multi-node environments.
+- **CNI Plugin**: Implemented in `./cmd/fancni/main.go`, responsible for managing network interfaces and integrating with Kubernetes.
+- **IP Address Management (IPAM)**: Located in `./internal/ipam`, currently using a file-based approach. A transition to a distributed solution is essential for scalability in multi-node environments.
 - **Networking Utilities**: The `internal/netutil` package provides essential helper functions for network operations, such as IP address manipulation and network interface management.
-- **iptables Management**: Handled in `internal/iptables`, with plans to migrate to nftables for improved functionality and performance.
-- **Configuration Management**: Managed by `internal/config`, allowing customizable settings for the CNI plugin based on deployment requirements.
+- **iptables Management**: Managed in `internal/iptables`, with plans to migrate to nftables for improved functionality and performance.
+- **Configuration Management**: Handled by `internal/config`, allowing customizable settings for the CNI plugin based on deployment requirements.
 - **Testing**: E2E tests are located in `tests/e2e/test-e2e.sh` and need to be transitioned to Go-based tests for better maintainability.
 
 ## Architectural Decisions

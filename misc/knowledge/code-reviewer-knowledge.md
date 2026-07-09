@@ -98,20 +98,4 @@ This document distills actionable knowledge for reviewing the `fancni` codebase,
 
 ### 3.2. Error Handling
 - Many error messages do not include enough context (e.g., which file, which operation).
-  - **Action**: Improve error messages to include contextual information for easier debugging.
-
-### 3.3. Code Consistency
-- Inconsistent naming conventions across files (e.g., `fanctl.go` vs `fan.go`).
-  - **Action**: Standardize naming conventions for functions and variables across the codebase for better readability.
-
-### 3.4. Magic Numbers
-- **fan.go**: Use of hardcoded values (e.g., subnet masks).
-  - **Action**: Replace magic numbers with named constants for clarity.
-
-### 3.5. Documentation
-- **README.md**: Lacks detailed setup instructions and usage examples.
-  - **Action**: Update documentation to include comprehensive setup and usage instructions for new developers.
-
---- 
-
-This reference should guide the code review process effectively, focusing on actionable improvements in test coverage, security, code quality, and documentation.
+  - **Action**: Enhance error messages to include contextual information for easier debugging.
