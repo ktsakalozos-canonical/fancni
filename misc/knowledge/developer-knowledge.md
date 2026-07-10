@@ -100,7 +100,8 @@
 
 ## Common Gotchas
 
-- Ensure that the log file path (`/var/log/fancni.log`) is writable; otherwise, logs will be lost.
-- When modifying the configuration, ensure that the input adheres to the expected format to avoid parsing errors.
-- Be cautious with the `go.mod` file; adding indirect dependencies may lead to unexpected behavior if not properly managed.
-- The `e2e` tests may require specific network configurations to run successfully; ensure the environment is set up correctly before execution.
+- Ensure that the log file path (`/var/log/fancni.log`) is writable by the process; otherwise, logs will be sent to `os.Stderr`.
+- Be cautious with error handling in external command execution; always check for `exec.ErrNotFound` to avoid silent failures.
+- When modifying the CNI configuration, ensure that the `NetConfig` struct is correctly populated to avoid runtime errors.
+- The `rock-build` command requires the `rockcraft` tool to be installed and configured properly for packaging.
+- Be aware of the implications of running `make clean`, as it will remove all build artifacts, including any generated binaries.

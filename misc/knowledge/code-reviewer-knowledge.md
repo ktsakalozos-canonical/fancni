@@ -98,4 +98,32 @@ This document distills actionable knowledge for reviewing the `fancni` codebase,
 
 ### 3.2. Error Handling
 - Many error messages do not include enough context (e.g., which file, which operation).
-  - **Action**: Enhance error messages to include contextual information for easier debugging.
+  - **Action**: Enhance error messages to provide more context, making debugging easier.
+
+### 3.3. Code Duplication
+- **Repeated Code**: Similar error handling patterns are found in multiple files.
+  - **Action**: Refactor common error handling into utility functions to reduce duplication and improve maintainability.
+
+### 3.4. Configuration Management
+- **Hardcoded Values**: Some configuration values are hardcoded in the codebase.
+  - **Action**: Move hardcoded values to configuration files or environment variables to enhance flexibility and security.
+
+---
+
+## 4. Error Handling Gaps
+
+### 4.1. General Error Handling
+- **Inconsistent Handling**: Some functions return errors but do not handle them properly.
+  - **Action**: Ensure all errors are checked and handled appropriately, especially in critical paths.
+
+### 4.2. Logging Errors
+- **Lack of Logging**: Errors are sometimes returned without logging.
+  - **Action**: Implement logging for all errors to facilitate debugging and monitoring.
+
+### 4.3. User Feedback
+- **User-facing Errors**: Errors that affect user experience are not always communicated clearly.
+  - **Action**: Improve user-facing error messages to be more informative and actionable.
+
+--- 
+
+This knowledge reference should guide the review process, ensuring that critical areas are addressed effectively.
