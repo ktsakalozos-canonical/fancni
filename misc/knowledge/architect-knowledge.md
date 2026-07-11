@@ -1,6 +1,6 @@
 ## System Boundaries and Module Responsibilities
 - **CNI Plugin**: Implemented in `./cmd/fancni/main.go`, responsible for managing network interfaces and integrating with Kubernetes.
-- **IP Address Management (IPAM)**: Located in `./internal/ipam`, currently using a file-based approach. A transition to a distributed solution is essential for scalability in multi-node environments.
+- **IP Address Management (IPAM)**: Located in `./internal/ipam`, currently using a file-based approach. Transition to a distributed solution is essential for scalability in multi-node environments.
 - **Networking Utilities**: The `internal/netutil` package provides essential helper functions for network operations, such as IP address manipulation and network interface management.
 - **iptables Management**: Managed in `internal/iptables`, with plans to migrate to nftables for improved functionality and performance.
 - **Configuration Management**: Handled by `internal/config`, allowing customizable settings for the CNI plugin based on deployment requirements.

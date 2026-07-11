@@ -100,8 +100,7 @@
 
 ## Common Gotchas
 
-- Ensure that the log file path (`/var/log/fancni.log`) is writable by the process; otherwise, logs will be sent to `os.Stderr`.
-- Be cautious with error handling in external command execution; always check for `exec.ErrNotFound` to avoid silent failures.
-- When modifying the CNI configuration, ensure that the `NetConfig` struct is correctly populated to avoid runtime errors.
-- The `rock-build` command requires the `rockcraft` tool to be installed and configured properly for packaging.
-- Be aware of the implications of running `make clean`, as it will remove all build artifacts, including any generated binaries.
+- Ensure that the logging directory (`/var/log/`) exists and is writable; otherwise, logs will be redirected to `os.Stderr`, which may lead to loss of log context.
+- When modifying configuration files or Helm charts, ensure to validate them using `make helm-lint` to catch potential issues early.
+- Be cautious with error handling in external command executions; always check for `exec.ErrNotFound` to provide meaningful feedback.
+- When running end-to-end tests, ensure that the environment is properly set up to mimic production conditions for accurate results.
