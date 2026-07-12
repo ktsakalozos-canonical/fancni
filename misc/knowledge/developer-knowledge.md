@@ -100,7 +100,7 @@
 
 ## Common Gotchas
 
-- Ensure that the logging directory (`/var/log/`) exists and is writable; otherwise, logs will be redirected to `os.Stderr`, which may lead to loss of log context.
-- When modifying configuration files or Helm charts, ensure to validate them using `make helm-lint` to catch potential issues early.
-- Be cautious with error handling in external command executions; always check for `exec.ErrNotFound` to provide meaningful feedback.
-- When running end-to-end tests, ensure that the environment is properly set up to mimic production conditions for accurate results.
+- Ensure that the log file directory exists and is writable; otherwise, logging will fall back to `os.Stderr`.
+- When modifying configuration files, ensure that the format remains consistent to avoid parsing errors.
+- Be cautious with the `go.mod` file; indirect dependencies can affect builds if not properly managed.
+- The `make e2e` command relies on the correct setup of the environment; ensure that all prerequisites are met before running.
