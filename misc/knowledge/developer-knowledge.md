@@ -100,7 +100,8 @@
 
 ## Common Gotchas
 
-- Ensure that the log file directory exists and is writable; otherwise, logging will fall back to `os.Stderr`.
-- When modifying configuration files, ensure that the format remains consistent to avoid parsing errors.
-- Be cautious with the `go.mod` file; indirect dependencies can affect builds if not properly managed.
-- The `make e2e` command relies on the correct setup of the environment; ensure that all prerequisites are met before running.
+- Ensure that the log file path `/var/log/fancni.log` is writable; otherwise, logs will be redirected to `os.Stderr`, which may lead to loss of log context.
+- When modifying the CNI configuration, ensure that the expected format is adhered to; incorrect formats can lead to parsing errors that are not always obvious.
+- Be cautious with the `make clean` command as it removes all build artifacts, including any manually created files in `_output/`.
+- The `go.mod` file should be kept up to date with dependencies; running `go mod tidy` can help clean up unused dependencies.
+- When running end-to-end tests, ensure that the environment is properly set up (e.g., required services are running) to avoid false negatives.
