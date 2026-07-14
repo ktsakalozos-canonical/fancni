@@ -101,7 +101,6 @@
 ## Common Gotchas
 
 - Ensure that the log file path `/var/log/fancni.log` is writable; otherwise, logs will be redirected to `os.Stderr`, which may lead to loss of log context.
-- When modifying the CNI configuration, ensure that the expected format is adhered to; incorrect formats can lead to parsing errors that are not always obvious.
-- Be cautious with the `make clean` command as it removes all build artifacts, including any manually created files in `_output/`.
-- The `go.mod` file should be kept up to date with dependencies; running `go mod tidy` can help clean up unused dependencies.
-- When running end-to-end tests, ensure that the environment is properly set up (e.g., required services are running) to avoid false negatives.
+- When modifying CNI configurations, ensure that the `NetConfig` struct is correctly populated to avoid runtime errors.
+- Be cautious with error handling in external command executions; always check for specific errors like `exec.ErrNotFound` to provide meaningful feedback.
+- The IPAM state files (`ipam.json`, `ipam.lock`) should be properly managed to prevent race conditions and data corruption.
