@@ -100,7 +100,8 @@
 
 ## Common Gotchas
 
-- Ensure that the log file path `/var/log/fancni.log` is writable; otherwise, logs will be redirected to `os.Stderr`, which may lead to loss of log context.
-- When modifying CNI configurations, ensure that the `NetConfig` struct is correctly populated to avoid runtime errors.
-- Be cautious with error handling in external command executions; always check for specific errors like `exec.ErrNotFound` to provide meaningful feedback.
-- The IPAM state files (`ipam.json`, `ipam.lock`) should be properly managed to prevent race conditions and data corruption.
+- Ensure that the log directory `/var/log/` exists and is writable; otherwise, logging will fail silently.
+- When modifying Helm charts, remember to run `make helm-lint` to catch issues early.
+- Be cautious with the `go.mod` file; ensure dependencies are properly managed to avoid conflicts.
+- The `tests/e2e/test-e2e.sh` script requires a running Kubernetes cluster; ensure the environment is set up correctly before running E2E tests.
+- The `rock-build` target in the Makefile requires `rockcraft` to be installed; ensure it is available in your environment.

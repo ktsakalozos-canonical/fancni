@@ -98,12 +98,4 @@ This document distills actionable knowledge for reviewing the `fancni` codebase,
 
 ### 3.2. Error Handling
 - Many error messages do not include enough context (e.g., which file, which operation).
-  - **Action**: Enhance error messages to include context for easier debugging and tracing.
-
-### 3.3. Code Duplication
-- **Internal Functions**: Review for duplicated logic across different files (e.g., IP validation).
-  - **Action**: Refactor common logic into utility functions to reduce duplication and improve maintainability.
-
-### 3.4. Configuration Management
-- **Hardcoded Values**: Review for hardcoded paths or values.
-  - **Action**: Externalize configuration options to environment variables or configuration files for better flexibility and security.
+  - **Action**: Enhance error messages to include more contextual information for easier debugging.
