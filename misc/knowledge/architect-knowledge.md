@@ -18,7 +18,7 @@
   - `github.com/vishvananda/netlink` (for network link management)
   - `github.com/vishvananda/netns` (for network namespace management)
   - `golang.org/x/sys` (for system calls)
-  
+
 - **Internal Dependencies**:
   - `internal/cni` should be decoupled from other internal packages to enhance maintainability and testability. Define interfaces for interactions between packages.
   - `internal/ipam` is tightly coupled with `internal/netutil` for network operations.

@@ -100,8 +100,8 @@
 
 ## Common Gotchas
 
-- Ensure that the log directory `/var/log/` exists and is writable; otherwise, logging will fail silently.
-- When modifying Helm charts, remember to run `make helm-lint` to catch issues early.
-- Be cautious with the `go.mod` file; ensure dependencies are properly managed to avoid conflicts.
-- The `tests/e2e/test-e2e.sh` script requires a running Kubernetes cluster; ensure the environment is set up correctly before running E2E tests.
-- The `rock-build` target in the Makefile requires `rockcraft` to be installed; ensure it is available in your environment.
+- Ensure that the log directory `/var/log/` is writable; otherwise, logs will be redirected to `os.Stderr`, which may lead to loss of log context.
+- When modifying CNI configurations, ensure that the input format adheres to the expected structure to avoid parsing errors.
+- Be cautious with error handling in external command executions; always check for `exec.ErrNotFound` to provide meaningful feedback.
+- The `rock-build` command requires `rockcraft` to be installed and configured correctly; ensure that your environment is set up before running this command.
+- Pay attention to the naming conventions for test functions; incorrect naming will prevent tests from being discovered and executed.
