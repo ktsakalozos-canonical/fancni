@@ -98,16 +98,4 @@ This document distills actionable knowledge for reviewing the `fancni` codebase,
 
 ### 3.2. Error Handling
 - Many error messages do not include enough context (e.g., which file, which operation).
-  - **Action**: Enhance error messages to include context for easier debugging.
-
-### 3.3. Consistency in Return Types
-- Ensure consistent return types across functions, especially in error handling (e.g., always return an error alongside a result).
-  - **Action**: Review functions in `internal/ipam` and `internal/fan` for consistency.
-
-### 3.4. Magic Numbers and Strings
-- Avoid using magic numbers or strings directly in the codebase.
-  - **Action**: Define constants for commonly used values (e.g., error codes, default paths).
-
-### 3.5. Documentation
-- Ensure that all public functions and methods have appropriate documentation.
-  - **Action**: Review and update comments in `internal/cni`, `internal/ipam`, and `internal/fan` to ensure clarity on function purpose and usage.
+  - **Action**: Enhance error messages to include more context for easier debugging and tracing.

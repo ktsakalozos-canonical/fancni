@@ -100,7 +100,8 @@
 
 ## Common Gotchas
 
-- Ensure that the log file path `/var/log/fancni.log` is writable by the process running the binary to avoid silent failures.
-- When modifying the `values.yaml` in Helm charts, ensure that the structure adheres to the expected schema to prevent deployment issues.
-- Be cautious with the `go.mod` file; indirect dependencies should be reviewed regularly to avoid version conflicts.
-- When running end-to-end tests, ensure that the test environment is properly set up, including network configurations and container states, to avoid flaky tests.
+- Ensure that the log file path (`/var/log/fancni.log`) is writable by the process; otherwise, logs will be redirected to `os.Stderr`.
+- When modifying CNI configurations, ensure that the correct CIDR format is used to avoid runtime errors.
+- Be cautious with error handling in `fanctl` commands; missing executables can lead to misleading error messages if not properly checked.
+- The `rock-build` command requires the `rockcraft` tool; ensure it is installed and configured correctly in your environment.
+- End-to-end tests can be sensitive to the state of the environment; ensure a clean state before running `make e2e`.
