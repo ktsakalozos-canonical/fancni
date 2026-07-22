@@ -5,7 +5,7 @@
 ### Error Handling
 
 - Use `fmt.Errorf("context: %w", err)` for wrapping errors to enhance traceability.
-- In `cmd/fancni/main.go`, errors from the main logic are handled by `writeCNIError(err)`, resulting in an exit code of 1.
+- In `cmd/fancni/main.go`, errors from the main logic are handled by `writeCNIError(err)`, which results in an exit code of 1.
 - When executing external commands (e.g., `fanctl`), check for `exec.ErrNotFound` and provide actionable error messages (see `internal/fan/fanctl.go`).
 - For file operations in IPAM, errors are propagated and wrapped; corrupt entries are detected and reported.
 
@@ -100,8 +100,7 @@
 
 ## Common Gotchas
 
-- Ensure that the log file path (`/var/log/fancni.log`) is writable by the process; otherwise, logs will be redirected to `os.Stderr`.
-- When modifying CNI configurations, ensure that the correct CIDR format is used to avoid runtime errors.
-- Be cautious with error handling in `fanctl` commands; missing executables can lead to misleading error messages if not properly checked.
-- The `rock-build` command requires the `rockcraft` tool; ensure it is installed and configured correctly in your environment.
-- End-to-end tests can be sensitive to the state of the environment; ensure a clean state before running `make e2e`.
+- Ensure that the log file path `/var/log/fancni.log` is writable by the process running the binary.
+- When modifying configuration, ensure that the `NetConfig` struct is updated accordingly to avoid runtime errors.
+- Be cautious with error handling in external command executions; always check for `exec.ErrNotFound` to provide meaningful feedback.
+- Be aware of the potential for race conditions in IPAM operations; ensure proper locking mechanisms are in place when accessing shared resources.
