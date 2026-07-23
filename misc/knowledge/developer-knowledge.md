@@ -100,7 +100,8 @@
 
 ## Common Gotchas
 
-- Ensure that the log file path `/var/log/fancni.log` is writable by the process running the binary.
-- When modifying configuration, ensure that the `NetConfig` struct is updated accordingly to avoid runtime errors.
-- Be cautious with error handling in external command executions; always check for `exec.ErrNotFound` to provide meaningful feedback.
-- Be aware of the potential for race conditions in IPAM operations; ensure proper locking mechanisms are in place when accessing shared resources.
+- Ensure that the log file path `/var/log/fancni.log` is writable; otherwise, logs will be directed to `os.Stderr`, which may be overlooked.
+- When modifying the CNI configuration, ensure that the input adheres to the expected format to avoid parsing errors.
+- Be cautious with the `go.mod` file; ensure dependencies are updated as needed, especially when introducing new packages.
+- The `rock-build` command requires `rockcraft` to be installed and configured properly; verify its availability before running the command.
+- Always check for the existence of required files (like `ipam.json` and `ipam.lock`) before running IPAM-related commands to prevent runtime errors.
