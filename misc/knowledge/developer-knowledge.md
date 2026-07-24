@@ -100,8 +100,8 @@
 
 ## Common Gotchas
 
-- Ensure that the log file path `/var/log/fancni.log` is writable; otherwise, logs will be directed to `os.Stderr`, which may be overlooked.
-- When modifying the CNI configuration, ensure that the input adheres to the expected format to avoid parsing errors.
-- Be cautious with the `go.mod` file; ensure dependencies are updated as needed, especially when introducing new packages.
-- The `rock-build` command requires `rockcraft` to be installed and configured properly; verify its availability before running the command.
-- Always check for the existence of required files (like `ipam.json` and `ipam.lock`) before running IPAM-related commands to prevent runtime errors.
+- Ensure that the log file path `/var/log/fancni.log` is writable by the process running the binary; otherwise, logs will be redirected to `os.Stderr`.
+- When modifying CNI configurations, ensure that the `NetConfig` struct is correctly populated to avoid runtime errors.
+- Be cautious with the `exec` package; always check for `exec.ErrNotFound` to handle missing executables gracefully.
+- The `make e2e` command relies on the correct setup of the environment for end-to-end tests; ensure all dependencies are met before running.
+- The `rock-build` command requires the `rockcraft` tool; ensure it is installed and configured correctly in your environment.
