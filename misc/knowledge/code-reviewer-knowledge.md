@@ -97,5 +97,5 @@ This document distills actionable knowledge for reviewing the `fancni` codebase,
     - **Action**: Consider making log path configurable or fallback to `/tmp/fancni.log` if `/var/log` is not writable.
 
 ### 3.2. Error Handling
-- Many error messages do not include enough context (e.g., which file, which operation).
-  - **Action**: Enhance error messages to include more context to aid in debugging and troubleshooting.
+- Many error messages do not include enough context (e.g., which file, which operation). 
+  - **Action**: Enhance error messages to include more context for easier debugging and tracing of issues.

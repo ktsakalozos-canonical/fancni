@@ -100,8 +100,8 @@
 
 ## Common Gotchas
 
-- Ensure that the log file path `/var/log/fancni.log` is writable by the process running the binary; otherwise, logs will be redirected to `os.Stderr`.
+- Ensure that the log file path (`/var/log/fancni.log`) is writable; otherwise, logs will be lost.
+- The `rockcraft` tool is required for building the package; ensure it is installed and configured properly.
+- Be cautious with the `go.mod` file; indirect dependencies may need to be updated when upgrading Go versions or libraries.
 - When modifying CNI configurations, ensure that the `NetConfig` struct is correctly populated to avoid runtime errors.
-- Be cautious with the `exec` package; always check for `exec.ErrNotFound` to handle missing executables gracefully.
-- The `make e2e` command relies on the correct setup of the environment for end-to-end tests; ensure all dependencies are met before running.
-- The `rock-build` command requires the `rockcraft` tool; ensure it is installed and configured correctly in your environment.
+- The end-to-end tests may require specific network configurations; ensure the testing environment matches expectations.
