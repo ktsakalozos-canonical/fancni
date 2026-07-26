@@ -97,5 +97,9 @@ This document distills actionable knowledge for reviewing the `fancni` codebase,
     - **Action**: Consider making log path configurable or fallback to `/tmp/fancni.log` if `/var/log` is not writable.
 
 ### 3.2. Error Handling
-- Many error messages do not include enough context (e.g., which file, which operation). 
-  - **Action**: Enhance error messages to include more context for easier debugging and tracing of issues.
+- Many error messages do not include enough context (e.g., which file, which operation).
+  - **Action**: Enhance error messages to include contextual information for easier debugging.
+
+### 3.3. Code Consistency
+- **Naming Conventions**: Ensure consistent naming conventions across files and functions. For example, use camelCase or snake_case uniformly.
+- **Documentation**: Ensure all public functions and methods have appropriate comments explaining their purpose and usage.

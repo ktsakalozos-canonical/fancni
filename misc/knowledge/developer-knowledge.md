@@ -100,8 +100,8 @@
 
 ## Common Gotchas
 
-- Ensure that the log file path (`/var/log/fancni.log`) is writable; otherwise, logs will be lost.
-- The `rockcraft` tool is required for building the package; ensure it is installed and configured properly.
-- Be cautious with the `go.mod` file; indirect dependencies may need to be updated when upgrading Go versions or libraries.
-- When modifying CNI configurations, ensure that the `NetConfig` struct is correctly populated to avoid runtime errors.
-- The end-to-end tests may require specific network configurations; ensure the testing environment matches expectations.
+- Ensure that the log file path (`/var/log/fancni.log`) is writable; otherwise, logs will be redirected to `os.Stderr`, which may lead to loss of log context.
+- Be cautious with error handling in `internal/fan/fanctl.go` when executing external commands; always check for `exec.ErrNotFound`.
+- When modifying the CNI configuration, ensure that the `NetConfig` struct is correctly populated to avoid runtime errors.
+- The IPAM state files (`ipam.json`, `ipam.lock`) should be managed carefully to prevent race conditions in concurrent environments.
+- Always validate input in functions like `parseIP` to avoid panics during execution.
