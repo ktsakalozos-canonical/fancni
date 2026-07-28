@@ -100,7 +100,8 @@
 
 ## Common Gotchas
 
-- Ensure that the log directory `/var/log/` is writable by the application; otherwise, logs will be redirected to `os.Stderr`, which may lead to loss of log data if not monitored.
-- When modifying the CNI configuration, ensure that the `NetConfig` struct is correctly populated to avoid runtime errors.
-- Be cautious with the use of external commands; always check for errors and handle them gracefully to avoid application crashes.
-- The `rockcraft` tool is used for packaging; ensure it is installed and configured properly before running `make rock-build`.
+- Ensure that the log file path (`/var/log/fancni.log`) is writable by the process; otherwise, logs will be redirected to `os.Stderr`.
+- When modifying the CNI configuration, ensure that the input adheres to the expected format to avoid parsing errors.
+- Be cautious with error handling in external command executions; missing executables can lead to misleading errors if not properly checked.
+- When running E2E tests, ensure that the environment is set up correctly, as they may depend on specific network configurations and multi-node setups.
+- Always clean up resources (e.g., IPAM state files) after tests to prevent state leakage between test runs.

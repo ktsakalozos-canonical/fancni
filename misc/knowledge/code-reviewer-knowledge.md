@@ -98,4 +98,12 @@ This document distills actionable knowledge for reviewing the `fancni` codebase,
 
 ### 3.2. Error Handling
 - Many error messages do not include enough context (e.g., which file, which operation).
-  - **Action**: Enhance error messages to include more context for easier debugging.
+  - **Action**: Enhance error messages to include more contextual information for easier debugging.
+
+### 3.3. Code Duplication
+- **Multiple instances of similar error handling** across files (e.g., IPAM errors).
+  - **Action**: Consider creating a centralized error handling function or struct to reduce duplication and improve maintainability.
+
+### 3.4. Configuration Management
+- **Hardcoded values** in various places (e.g., log paths, default network settings).
+  - **Action**: Externalize configuration to a single source (e.g., config file or environment variables) for better flexibility and maintainability.
